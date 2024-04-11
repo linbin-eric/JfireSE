@@ -45,8 +45,10 @@ public class ClassInfo
             }
             else
             {
+                jfireSE.incrDepth();
                 byteArray.put((byte) 8);
                 serializer.writeBytes(byteArray, instance);
+                jfireSE.reduceDepth();
             }
         }
         else
