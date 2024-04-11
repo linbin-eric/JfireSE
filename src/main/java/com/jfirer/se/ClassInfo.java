@@ -13,7 +13,8 @@ public class ClassInfo
     private String     className;
     private Serializer serializer;
     private JfireSE    jfireSE;
-    private Object[]   refTracking;
+    private Object[]   tracking;
+    private boolean    refTracking;
     private int        refTrackingIndex = 0;
 
     public void writeBytes(InternalByteArray byteArray, Object instance, boolean knownClazz)
@@ -29,7 +30,7 @@ public class ClassInfo
         }
         if (knownClazz)
         {
-            if (jfireSE.isCycleSupport())
+            if (refTracking)
             {
                 int tracking = addTracking(instance);
                 if (tracking == -1)
@@ -53,7 +54,7 @@ public class ClassInfo
         }
         else
         {
-            if (jfireSE.isCycleSupport())
+            if (refTracking)
             {
                 if (classId == ClassInfoResolver.NO_CLASS_ID)
                 {
@@ -101,32 +102,65 @@ public class ClassInfo
         }
     }
 
-    public void reset()
+    public void reset(int tempClassIdStart)
     {
-        classId          = ClassInfoResolver.NO_CLASS_ID;
+        if (classId < tempClassIdStart)
+        {
+            ;
+        }
+        else
+        {
+            classId = ClassInfoResolver.NO_CLASS_ID;
+        }
         refTrackingIndex = 0;
     }
 
     public int addTracking(Object instance)
     {
-        if (refTracking == null)
+        if (tracking == null)
         {
-            refTracking = new Object[4];
+            tracking = new Object[4];
         }
         for (int i = 0; i < refTrackingIndex; i++)
         {
-            if (refTracking[i] == instance)
+            if (tracking[i] == instance)
             {
                 return i;
             }
         }
-        if (refTrackingIndex == refTracking.length)
+        if (refTrackingIndex == tracking.length)
         {
-            Object[] newRefTracking = new Object[refTracking.length * 2];
-            System.arraycopy(refTracking, 0, newRefTracking, 0, refTracking.length);
-            refTracking = newRefTracking;
+            Object[] newRefTracking = new Object[tracking.length * 2];
+            System.arraycopy(tracking, 0, newRefTracking, 0, tracking.length);
+            tracking = newRefTracking;
         }
-        refTracking[refTrackingIndex++] = instance;
+        tracking[refTrackingIndex++] = instance;
         return -1;
+    }
+
+    /**
+     * 解析的是序列化协议中序号 3 的内容
+     *
+     * @param byteArray
+     * @param refTracking
+     * @return
+     */
+    public Object readBytes(InternalByteArray byteArray, boolean refTracking)
+    {
+        if (serializer == null)
+        {
+            serializer = jfireSE.getSerializer(clazz);
+        }
+        Object instance = serializer.readBytes(byteArray);
+        if (refTracking)
+        {
+            addTracking(instance);
+        }
+        return instance;
+    }
+
+    public Object getTracking(int instanceId)
+    {
+        return tracking[instanceId];
     }
 }

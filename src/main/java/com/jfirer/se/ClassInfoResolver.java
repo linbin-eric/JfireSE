@@ -1,46 +1,59 @@
 package com.jfirer.se;
 
-import com.jfirer.se.serializer.SerializerResolver;
-
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class ClassInfoResolver
 {
-    public static int                   NO_CLASS_ID    = 0;
-    private       Map<Class, ClassInfo> store          = new IdentityHashMap<>();
-    private       int                   currentClassId = 1;
-    private       int                   fixedClassId   = 1;
-    private       ClassInfo[]           tracking       = new ClassInfo[32];
+    public static int                   NO_CLASS_ID      = 0;
+    private       Map<Class, ClassInfo> store            = new IdentityHashMap<>();
+    private       int                   nextClassId      = 1;
+    private       int                   tempClassIdStart = 1;
+    private       ClassInfo[]           tracking         = new ClassInfo[32];
     private       JfireSE               jfireSE;
-    private       SerializerResolver    resolver;
 
-    public ClassInfoResolver(SerializerResolver resolver, JfireSE jfireSE)
+    public ClassInfoResolver(JfireSE jfireSE)
     {
-        this.resolver = resolver;
-        this.jfireSE  = jfireSE;
+        this.jfireSE = jfireSE;
+        registerClass(int[].class);
+        registerClass(long[].class);
+        registerClass(short[].class);
+        registerClass(float[].class);
+        registerClass(double[].class);
+        registerClass(char[].class);
+        registerClass(boolean[].class);
+        registerClass(byte[].class);
+        registerClass(String[].class);
+        registerClass(Integer[].class);
+        registerClass(Long[].class);
+        registerClass(Short[].class);
+        registerClass(Float[].class);
+        registerClass(Double[].class);
+        registerClass(Character[].class);
+        registerClass(Boolean[].class);
+        registerClass(Byte[].class);
     }
 
     public void getClassId(ClassInfo classInfo)
     {
-        if (currentClassId > tracking.length)
+        if (nextClassId > tracking.length)
         {
             ClassInfo[] newTracking = new ClassInfo[tracking.length << 1];
             System.arraycopy(tracking, 0, newTracking, 0, tracking.length);
             tracking = newTracking;
         }
-        tracking[currentClassId] = classInfo;
-        classInfo.setClassId(currentClassId);
-        currentClassId += 1;
+        tracking[nextClassId] = classInfo;
+        classInfo.setClassId(nextClassId);
+        nextClassId += 1;
     }
 
     public void reset()
     {
-        for (int i = currentClassId - 1; i > fixedClassId; i--)
+        for (int i = 1; i < nextClassId; i++)
         {
-            tracking[i].reset();
+            tracking[i].reset(tempClassIdStart);
         }
-        currentClassId = fixedClassId;
+        nextClassId = tempClassIdStart;
     }
 
     public ClassInfo getClassInfo(Class clazz)
@@ -48,7 +61,7 @@ public class ClassInfoResolver
         ClassInfo classInfo = store.get(clazz);
         if (classInfo == null)
         {
-            classInfo = new ClassInfo().setClassName(clazz.getName()).setJfireSE(jfireSE).setClazz(clazz);
+            classInfo = new ClassInfo().setClassName(clazz.getName()).setJfireSE(jfireSE).setRefTracking(jfireSE.isRefTracking()).setClazz(clazz);
             store.put(clazz, classInfo);
             return classInfo;
         }
@@ -60,24 +73,29 @@ public class ClassInfoResolver
         ClassInfo classInfo = getClassInfo(clazz);
         if (classInfo == null)
         {
-            classInfo = new ClassInfo().setClassName(clazz.getName()).setJfireSE(jfireSE).setClazz(clazz);
+            classInfo = new ClassInfo().setClassName(clazz.getName()).setJfireSE(jfireSE).setRefTracking(jfireSE.isRefTracking()).setClazz(clazz);
             store.put(clazz, classInfo);
         }
-        for (int i = 1; i < fixedClassId; i++)
+        for (int i = 1; i < tempClassIdStart; i++)
         {
             if (tracking[i].getClazz() == clazz)
             {
                 return;
             }
         }
-        if (fixedClassId > tracking.length)
+        if (tempClassIdStart > tracking.length)
         {
             ClassInfo[] newTracking = new ClassInfo[tracking.length << 1];
             System.arraycopy(tracking, 0, newTracking, 0, tracking.length);
             tracking = newTracking;
         }
-        tracking[fixedClassId] = classInfo;
-        classInfo.setClassId(fixedClassId++);
-        currentClassId = fixedClassId;
+        tracking[tempClassIdStart] = classInfo;
+        classInfo.setClassId(tempClassIdStart++);
+        nextClassId = tempClassIdStart;
+    }
+
+    public ClassInfo getClassInfo(int classId)
+    {
+        return tracking[classId];
     }
 }
