@@ -79,7 +79,7 @@ public class JfireSE
             classInfoResolver.reset();
         }
         byte[] result = byteArray.toArray();
-        byteArray.setWritePosi(0);
+        byteArray.setWriterIndex(0);
         return result;
     }
 

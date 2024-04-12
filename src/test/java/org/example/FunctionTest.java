@@ -1,6 +1,9 @@
 package org.example;
 
+import com.jfirer.se.ByteArray;
+import com.jfirer.se.InternalByteArray;
 import com.jfirer.se.JfireSE;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -22,9 +25,12 @@ public class FunctionTest
     @Test
     public void test2()
     {
-        TestData data    = new TestData();
-        JfireSE  jfireSE = new JfireSE();
-        byte[]   bytes   = jfireSE.writeBytes(data);
-        Object   o       = jfireSE.readBytes(bytes);
+        InternalByteArray byteArray = (InternalByteArray) ByteArray.allocate();
+        byteArray.writeVarInt(5);
+        Assert.assertEquals(5, byteArray.readVarInt());
+        byteArray.writeVarInt(200);
+        Assert.assertEquals(200, byteArray.readVarInt());
+        byteArray.writeVarInt(7000);
+        Assert.assertEquals(7000, byteArray.readVarInt());
     }
 }

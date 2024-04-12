@@ -21,19 +21,14 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class BenchMark
 {
-    Fse fse   = new Fse();
-    Fse fse_3 = new Fse().useCompile();
-    TestData  data = new TestData();
-    ByteArray buf  = ByteArray.allocate(100);
-    Fury      fury = Fury.builder().withLanguage(Language.JAVA)//
+    Fse       fse     = new Fse();
+    Fse       fse_3   = new Fse().useCompile();
+    TestData  data    = new TestData();
+    ByteArray buf     = ByteArray.allocate(100);
+    Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
                             .withRefTracking(true).build();
     JfireSE   jfireSE = new JfireSE();
-
-    @Setup
-    public void before(){
-        jfireSE.registerClass(TestData.class);
-    }
 
     @Benchmark
     public void testNoCompile()
