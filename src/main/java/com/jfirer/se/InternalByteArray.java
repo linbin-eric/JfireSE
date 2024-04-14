@@ -649,7 +649,7 @@ public class InternalByteArray extends ByteArray
     public void writePrimitiveArrayWithSizeEmbedded(Object arr, int arrOffset, int numBytes)
     {
         int idx = writerIndex;
-        ensureNewWriterIndex(idx + 5 + numBytes);
+        ensureNewWriterIndex(idx + 8 + numBytes);
         idx += writePositiveVarIntWithoutEnsure(numBytes);
         final long destAddr = BYTE_ARRAY_OFFSET + idx;
         copyMemory(arr, arrOffset, array, destAddr, numBytes);
@@ -834,7 +834,27 @@ public class InternalByteArray extends ByteArray
     {
         if (STRING_VALUE_FIELD_IS_BYTES)
         {
-            UNSAFE.getReference(value, STRING_VALUE_FIELD_OFFSET);
+            byte[] bytes    = (byte[]) UNSAFE.getReference(value, STRING_VALUE_FIELD_OFFSET);
+            byte   coder    = UNSAFE.getByte(value, STRING_CODER_FIELD_OFFSET);
+            int    idx      = writerIndex;
+            int    numBytes = bytes.length;
+            ensureNewWriterIndex(idx + 9 + bytes.length);
+            UNSAFE.putByte(array, BYTE_ARRAY_OFFSET + idx, coder);
+            idx += writePositiveVarIntWithoutEnsure(numBytes) + 1;
+            final long destAddr = BYTE_ARRAY_OFFSET + idx;
+            copyMemory(bytes, BYTE_ARRAY_OFFSET, array, destAddr, numBytes);
+            writerIndex = idx + numBytes;
+        }
+        else
+        {
+            char[] chars = (char[]) UNSAFE.getReference(value, STRING_VALUE_FIELD_OFFSET);
+            writeCharsWithSizeEmbedded(chars);
+        }
+    }
+    public String readString(){
+        if (STRING_VALUE_FIELD_IS_BYTES)
+        {
+
         }
         else{
 
