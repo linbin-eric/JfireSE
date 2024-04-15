@@ -120,8 +120,8 @@ public class ObjectSerializer implements Serializer
                 case ReflectUtil.PRIMITIVE_LONG -> accessor.set(instance, byteArray.readVarLong());
                 case ReflectUtil.PRIMITIVE_FLOAT -> accessor.set(instance, byteArray.readFloat());
                 case ReflectUtil.PRIMITIVE_DOUBLE -> accessor.set(instance, byteArray.readDouble());
-                case ReflectUtil.PRIMITIVE_BOOL -> accessor.set(instance, byteArray.readPositive() == 1);
-                case ReflectUtil.PRIMITIVE_CHAR -> accessor.set(instance, byteArray.readVarChar());
+                case ReflectUtil.PRIMITIVE_BOOL -> accessor.set(instance, byteArray.readBoolean() );
+                case ReflectUtil.PRIMITIVE_CHAR -> accessor.set(instance, byteArray.readChar());
                 case ReflectUtil.PRIMITIVE_SHORT -> accessor.set(instance, byteArray.readShort());
                 case ReflectUtil.PRIMITIVE_BYTE -> accessor.set(instance, byteArray.get());
                 case ReflectUtil.CLASS_INT ->
@@ -176,7 +176,7 @@ public class ObjectSerializer implements Serializer
                     }
                     else
                     {
-                        accessor.set(instance, byteArray.readPositive() == 1);
+                        accessor.set(instance, byteArray.readBoolean());
                     }
                 }
                 case ReflectUtil.CLASS_CHAR ->
@@ -187,7 +187,7 @@ public class ObjectSerializer implements Serializer
                     }
                     else
                     {
-                        accessor.set(instance, byteArray.readVarChar());
+                        accessor.set(instance, byteArray.readChar());
                     }
                 }
                 case ReflectUtil.CLASS_SHORT ->
@@ -234,8 +234,8 @@ public class ObjectSerializer implements Serializer
                 case ReflectUtil.PRIMITIVE_LONG -> byteArray.writeVarLong(accessor.getLong(instance));
                 case ReflectUtil.PRIMITIVE_FLOAT -> byteArray.writeFloat(accessor.getFloat(instance));
                 case ReflectUtil.PRIMITIVE_DOUBLE -> byteArray.writeDouble(accessor.getDouble(instance));
-                case ReflectUtil.PRIMITIVE_BOOL -> byteArray.writePositive(accessor.getBoolean(instance) ? 1 : 0);
-                case ReflectUtil.PRIMITIVE_CHAR -> byteArray.writeVarChar(accessor.getChar(instance));
+                case ReflectUtil.PRIMITIVE_BOOL -> byteArray.writeBoolean(accessor.getBoolean(instance));
+                case ReflectUtil.PRIMITIVE_CHAR -> byteArray.writeChar(accessor.getChar(instance));
                 case ReflectUtil.PRIMITIVE_SHORT -> byteArray.writeShort(accessor.getShort(instance));
                 case ReflectUtil.PRIMITIVE_BYTE -> byteArray.put(accessor.getByte(instance));
                 case ReflectUtil.CLASS_INT ->
@@ -300,7 +300,7 @@ public class ObjectSerializer implements Serializer
                     else
                     {
                         byteArray.put(JfireSE.NOT_NULL);
-                        byteArray.writePositive(value ? 1 : 0);
+                        byteArray.put((byte) (value ? 1 : 0));
                     }
                 }
                 case ReflectUtil.CLASS_CHAR ->
@@ -313,7 +313,7 @@ public class ObjectSerializer implements Serializer
                     else
                     {
                         byteArray.put(JfireSE.NOT_NULL);
-                        byteArray.writeVarChar(value);
+                        byteArray.writeChar(value);
                     }
                 }
                 case ReflectUtil.CLASS_SHORT ->

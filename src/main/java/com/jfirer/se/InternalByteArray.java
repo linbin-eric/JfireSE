@@ -1,5 +1,9 @@
 package com.jfirer.se;
 
+/**
+ * 对于int，long，short，char，在内存中需要统一一种存储顺序，才能跨机器传输与识别。
+ * 由于存在 varInt 和 varLong 的变长编码，因此采用小端序，能够较好的适应这种变长编码。
+ */
 public class InternalByteArray extends ByteArray
 {
     public InternalByteArray(int size)
@@ -838,11 +842,10 @@ public class InternalByteArray extends ByteArray
             byte   coder    = UNSAFE.getByte(value, STRING_CODER_FIELD_OFFSET);
             int    idx      = writerIndex;
             int    numBytes = bytes.length;
-            ensureNewWriterIndex(idx + 9 + bytes.length);
+            ensureNewWriterIndex(idx + 9 + numBytes);
             UNSAFE.putByte(array, BYTE_ARRAY_OFFSET + idx, coder);
             idx += writePositiveVarIntWithoutEnsure(numBytes) + 1;
-            final long destAddr = BYTE_ARRAY_OFFSET + idx;
-            copyMemory(bytes, BYTE_ARRAY_OFFSET, array, destAddr, numBytes);
+            System.arraycopy(bytes, 0, array, idx, numBytes);
             writerIndex = idx + numBytes;
         }
         else
@@ -851,14 +854,16 @@ public class InternalByteArray extends ByteArray
             writeCharsWithSizeEmbedded(chars);
         }
     }
-    public String readString(){
+
+    public String readString()
+    {
         if (STRING_VALUE_FIELD_IS_BYTES)
         {
-
         }
-        else{
-
+        else
+        {
         }
+        return null;
     }
 
     public boolean remainRead()
