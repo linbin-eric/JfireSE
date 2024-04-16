@@ -1,7 +1,5 @@
 package com.jfirer.se.serializer;
 
-import com.jfirer.fse.serializer.array.*;
-import com.jfirer.se.InternalByteArray;
 import com.jfirer.se.JfireSE;
 import com.jfirer.se.serializer.impl.ArraySerializer;
 import com.jfirer.se.serializer.impl.ObjectSerializer;
@@ -51,7 +49,6 @@ public class SerializerResolver
             count++;
             value >>= 1;
         }
-        return count-1;
+        return count - 1;
     }
-
 }

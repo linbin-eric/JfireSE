@@ -1,10 +1,10 @@
 package com.jfirer.se.serializer;
 
-import com.jfirer.se.InternalByteArray;
+import com.jfirer.se.ByteArray;
 
 public interface Serializer
 {
-    void writeBytes(InternalByteArray byteArray, Object instance);
+    void writeBytes(ByteArray byteArray, Object instance);
 
-    Object readBytes(InternalByteArray byteArray);
+    Object readBytes(ByteArray byteArray);
 }

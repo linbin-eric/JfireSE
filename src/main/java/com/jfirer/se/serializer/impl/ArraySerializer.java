@@ -1,7 +1,7 @@
 package com.jfirer.se.serializer.impl;
 
+import com.jfirer.se.ByteArray;
 import com.jfirer.se.ClassInfo;
-import com.jfirer.se.InternalByteArray;
 import com.jfirer.se.JfireSE;
 import com.jfirer.se.serializer.Serializer;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
@@ -37,7 +37,7 @@ public class ArraySerializer implements Serializer
     }
 
     @Override
-    public void writeBytes(InternalByteArray byteArray, Object instance)
+    public void writeBytes(ByteArray byteArray, Object instance)
     {
         int length = ((Object[]) instance).length;
         byteArray.writeVarInt(length);
@@ -71,7 +71,7 @@ public class ArraySerializer implements Serializer
     }
 
     @Override
-    public Object readBytes(InternalByteArray byteArray)
+    public Object readBytes(ByteArray byteArray)
     {
         int    length = byteArray.readVarInt();
         Object array  = Array.newInstance(componentType, length);

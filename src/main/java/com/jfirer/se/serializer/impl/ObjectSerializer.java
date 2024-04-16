@@ -2,8 +2,8 @@ package com.jfirer.se.serializer.impl;
 
 import com.jfirer.baseutil.reflect.ReflectUtil;
 import com.jfirer.baseutil.reflect.ValueAccessor;
+import com.jfirer.se.ByteArray;
 import com.jfirer.se.ClassInfo;
-import com.jfirer.se.InternalByteArray;
 import com.jfirer.se.JfireSE;
 import com.jfirer.se.serializer.Serializer;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
@@ -12,7 +12,10 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 
 @SuppressWarnings("rawtypes")
@@ -56,7 +59,7 @@ public class ObjectSerializer implements Serializer
     }
 
     @Override
-    public void writeBytes(InternalByteArray byteArray, Object instance)
+    public void writeBytes(ByteArray byteArray, Object instance)
     {
         for (FieldInfo primitiveFieldInfo : primitiveFieldInfos)
         {
@@ -78,7 +81,7 @@ public class ObjectSerializer implements Serializer
 
     @SneakyThrows
     @Override
-    public Object readBytes(InternalByteArray byteArray)
+    public Object readBytes(ByteArray byteArray)
     {
         Object instance = UNSAFE.allocateInstance(clazz);
         for (FieldInfo primitiveFieldInfo : primitiveFieldInfos)
@@ -112,7 +115,7 @@ public class ObjectSerializer implements Serializer
             accessor = new ValueAccessor(field);
         }
 
-        void read(InternalByteArray byteArray, Object instance)
+        void read(ByteArray byteArray, Object instance)
         {
             switch (classId)
             {
@@ -226,7 +229,7 @@ public class ObjectSerializer implements Serializer
             }
         }
 
-        void write(InternalByteArray byteArray, Object instance)
+        void write(ByteArray byteArray, Object instance)
         {
             switch (classId)
             {
@@ -371,7 +374,7 @@ public class ObjectSerializer implements Serializer
             classInfo = jfireSE.getClassInfo(field.getType());
         }
 
-        void write(InternalByteArray byteArray, Object instance)
+        void write(ByteArray byteArray, Object instance)
         {
             Object value = accessor.get(instance);
             if (value == null)
@@ -384,7 +387,7 @@ public class ObjectSerializer implements Serializer
             }
         }
 
-        public void read(InternalByteArray byteArray, Object instance)
+        public void read(ByteArray byteArray, Object instance)
         {
             byte flag = byteArray.get();
             switch (flag)
@@ -408,7 +411,7 @@ public class ObjectSerializer implements Serializer
             accessor = new ValueAccessor(field);
         }
 
-        void write(InternalByteArray byteArray, Object instance)
+        void write(ByteArray byteArray, Object instance)
         {
             if (instance == null)
             {
@@ -427,7 +430,7 @@ public class ObjectSerializer implements Serializer
             }
         }
 
-        void read(InternalByteArray byteArray, Object instance)
+        void read(ByteArray byteArray, Object instance)
         {
             accessor.setObject(instance, jfireSE.readBytes(byteArray));
         }

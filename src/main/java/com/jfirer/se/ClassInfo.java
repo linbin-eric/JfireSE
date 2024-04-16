@@ -17,7 +17,7 @@ public class ClassInfo
     private boolean    refTracking;
     private int        refTrackingIndex = 0;
 
-    public void writeBytes(InternalByteArray byteArray, Object instance, boolean knownClazz)
+    public void writeBytes(ByteArray byteArray, Object instance, boolean knownClazz)
     {
         if (instance == null)
         {
@@ -145,7 +145,7 @@ public class ClassInfo
      * @param refTracking
      * @return
      */
-    public Object readBytes(InternalByteArray byteArray, boolean refTracking)
+    public Object readBytes(ByteArray byteArray, boolean refTracking)
     {
         if (serializer == null)
         {

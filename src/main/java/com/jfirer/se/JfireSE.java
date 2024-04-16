@@ -19,7 +19,7 @@ public class JfireSE
     private             ClassInfoResolver     classInfoResolver  = new ClassInfoResolver(this);
     private             int                   depth              = 1;
     private             Map<String, Class<?>> classNameMap       = new HashMap<>();
-    private             InternalByteArray     byteArray          = new InternalByteArray(1024);
+    private             ByteArray             byteArray          = new ByteArray(1024);
 
     public Serializer getSerializer(Class clazz)
     {
@@ -85,10 +85,10 @@ public class JfireSE
 
     public Object readBytes(byte[] bytes)
     {
-        return readBytes(new InternalByteArray(bytes));
+        return readBytes(new ByteArray(bytes));
     }
 
-    public Object readBytes(InternalByteArray byteArray)
+    public Object readBytes(ByteArray byteArray)
     {
         byte flag = byteArray.get();
         switch (flag)

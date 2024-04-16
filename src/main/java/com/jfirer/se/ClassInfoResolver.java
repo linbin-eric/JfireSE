@@ -1,5 +1,7 @@
 package com.jfirer.se;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -7,7 +9,7 @@ public class ClassInfoResolver
 {
     public static int                   NO_CLASS_ID      = 0;
     private       Map<Class, ClassInfo> store            = new IdentityHashMap<>();
-    private       int                   nextClassId      = 1;
+    private       int                   nextTempClassId  = 1;
     private       int                   tempClassIdStart = 1;
     private       ClassInfo[]           tracking         = new ClassInfo[32];
     private       JfireSE               jfireSE;
@@ -31,29 +33,41 @@ public class ClassInfoResolver
         registerClass(Double[].class);
         registerClass(Character[].class);
         registerClass(Boolean[].class);
-        registerClass(Byte[].class);
+        registerClass(ByteArray[].class);
+        registerClass(String.class);
+        registerClass(Integer.class);
+        registerClass(Long.class);
+        registerClass(Short.class);
+        registerClass(Float.class);
+        registerClass(Double.class);
+        registerClass(Character.class);
+        registerClass(Boolean.class);
+        registerClass(ByteArray.class);
+        registerClass(Date.class);
+        registerClass(java.sql.Date.class);
+        registerClass(LocalDateTime.class);
     }
 
     public void getClassId(ClassInfo classInfo)
     {
-        if (nextClassId > tracking.length)
+        if (nextTempClassId > tracking.length)
         {
             ClassInfo[] newTracking = new ClassInfo[tracking.length << 1];
             System.arraycopy(tracking, 0, newTracking, 0, tracking.length);
             tracking = newTracking;
         }
-        tracking[nextClassId] = classInfo;
-        classInfo.setClassId(nextClassId);
-        nextClassId += 1;
+        tracking[nextTempClassId] = classInfo;
+        classInfo.setClassId(nextTempClassId);
+        nextTempClassId += 1;
     }
 
     public void reset()
     {
-        for (int i = 1; i < nextClassId; i++)
+        for (int i = 1; i < nextTempClassId; i++)
         {
             tracking[i].reset(tempClassIdStart);
         }
-        nextClassId = tempClassIdStart;
+        nextTempClassId = tempClassIdStart;
     }
 
     public ClassInfo getClassInfo(Class clazz)
@@ -90,8 +104,9 @@ public class ClassInfoResolver
             tracking = newTracking;
         }
         tracking[tempClassIdStart] = classInfo;
-        classInfo.setClassId(tempClassIdStart++);
-        nextClassId = tempClassIdStart;
+        classInfo.setClassId(tempClassIdStart);
+        tempClassIdStart += 1;
+        nextTempClassId = tempClassIdStart;
     }
 
     public ClassInfo getClassInfo(int classId)
