@@ -1,4 +1,4 @@
-package com.jfirer.se;
+package com.jfirer.se2;
 
 import com.jfirer.baseutil.reflect.ReflectUtil;
 import com.jfirer.fse.InternalByteArray;

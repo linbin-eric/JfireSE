@@ -1,6 +1,6 @@
 package org.example;
 
-import com.jfirer.se.ByteArray;
+import com.jfirer.se2.ByteArray;
 import org.junit.Assert;
 import org.junit.Test;
 

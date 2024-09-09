@@ -2,7 +2,7 @@ package org.example;
 
 import com.jfirer.fse.ByteArray;
 import com.jfirer.fse.Fse;
-import com.jfirer.se.JfireSE;
+import com.jfirer.se2.JfireSE;
 import io.fury.Fury;
 import io.fury.config.Language;
 import org.openjdk.jmh.annotations.*;
@@ -28,7 +28,7 @@ public class BenchMark
     Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
                             .withRefTracking(true).build();
-    JfireSE   jfireSE = new JfireSE();
+    JfireSE   jfireSE = JfireSE.build();
 
     @Benchmark
     public void testNoCompile()
@@ -53,7 +53,7 @@ public class BenchMark
     @Benchmark
     public void testJfireSE()
     {
-        jfireSE.writeBytes(data);
+        jfireSE.write(data);
     }
 
     public static void main(String[] args) throws RunnerException

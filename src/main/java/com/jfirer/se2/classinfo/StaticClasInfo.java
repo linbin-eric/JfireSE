@@ -1,0 +1,39 @@
+package com.jfirer.se2.classinfo;
+
+import com.jfirer.se2.ByteArray;
+import com.jfirer.se2.JfireSE;
+
+public class StaticClasInfo extends ClassInfo
+{
+    public StaticClasInfo(short classId, String className, Class<?> clazz, boolean refTracking)
+    {
+        super(classId, className, clazz, refTracking);
+    }
+
+    @Override
+    public void  write(ByteArray byteArray, Object instance)
+    {
+        if (refTrack)
+        {
+            int i = addTracking(instance);
+            if (i == -1)
+            {
+                byteArray.put(JfireSE.id_content_track);
+                byteArray.writeVarInt(classId);
+                serializer.writeBytes(byteArray, instance);
+            }
+            else
+            {
+                byteArray.put(JfireSE.ID_INSTANCE_ID);
+                byteArray.writeVarInt(classId);
+                byteArray.writeVarInt(i);
+            }
+        }
+        else
+        {
+            byteArray.put(JfireSE.id_content_un_track);
+            byteArray.writeVarInt(classId);
+            serializer.writeBytes(byteArray, instance);
+        }
+    }
+}

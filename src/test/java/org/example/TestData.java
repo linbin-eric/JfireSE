@@ -1,7 +1,10 @@
 package org.example;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class TestData implements Serializable
 {
     private int       a = 213212312;
@@ -12,7 +15,7 @@ public class TestData implements Serializable
     private long      f = 1213124131312321L;
     private double    g = 231321.2132;
     private float     h = (float) 4986.2;
-//    private String    i = "123452312316789a";
+    private String    i = "123452312316789a";
 //    private int[]     j = new int[]{1, 2, 4, 5};
 //    private boolean[] k = new boolean[]{true, false, true, false, false, false, true};
 //    private char[]    l = new char[]{'a', 'v', 'q', 'j', 'h', 'e', 'f'};
