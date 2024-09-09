@@ -13,12 +13,21 @@ public class VariableFieldInfo extends FieldInfo
 {
     private final JfireSEImpl jfireSE;
     private       ClassInfo   classInfo;
+    private final ClassInfo   firstClassInfo;
 
     public VariableFieldInfo(Field field, JfireSEImpl jfireSE)
     {
         super(ReflectUtil.getClassId(field.getType()), new ValueAccessor(field));
         classInfo    = jfireSE.getForSerialize(field.getType());
         this.jfireSE = jfireSE;
+        if (field.getType().isInterface())
+        {
+            firstClassInfo = null;
+        }
+        else
+        {
+            firstClassInfo = classInfo;
+        }
     }
 
     @Override
@@ -34,12 +43,26 @@ public class VariableFieldInfo extends FieldInfo
             Class<?> objClass = obj.getClass();
             if (objClass == classInfo.getClazz())
             {
-                classInfo.write(byteArray, obj);
+                if (classInfo == firstClassInfo)
+                {
+                    classInfo.writeKnownClazz(byteArray, obj);
+                }
+                else
+                {
+                    classInfo.write(byteArray, obj);
+                }
             }
             else
             {
                 classInfo = jfireSE.getForSerialize(objClass);
-                classInfo.write(byteArray, instance);
+                if (classInfo == firstClassInfo)
+                {
+                    classInfo.writeKnownClazz(byteArray, obj);
+                }
+                else
+                {
+                    classInfo.write(byteArray, obj);
+                }
             }
         }
     }
