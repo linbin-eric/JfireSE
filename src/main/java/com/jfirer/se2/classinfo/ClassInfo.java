@@ -3,20 +3,31 @@ package com.jfirer.se2.classinfo;
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.serializer.Serializer;
+import io.github.karlatemp.unsafeaccessor.Unsafe;
 import lombok.Data;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Data
 public abstract class ClassInfo
 {
-    protected final short      classId;
-    protected final String     className;
-    protected final Class<?>   clazz;
-    protected final boolean    refTrack;
-    protected       Object[]   tracking;
-    protected       int        refTrackingIndex = 0;
-    protected       Serializer serializer;
+    protected final        short      classId;
+    protected final        byte[]     classNameBytes;
+    protected final        Class<?>   clazz;
+    protected final        boolean    refTrack;
+    protected              Object[]   tracking;
+    protected              int        refTrackingIndex = 0;
+    protected              Serializer serializer;
+    protected static final Unsafe     UNSAFE           = Unsafe.getUnsafe();
+
+    public ClassInfo(short classId, Class<?> clazz, boolean refTrack)
+    {
+        this.classId   = classId;
+        this.clazz     = clazz;
+        this.refTrack  = refTrack;
+        classNameBytes = clazz.getName().getBytes(StandardCharsets.UTF_8);
+    }
 
     public int addTracking(Object instance)
     {
@@ -75,5 +86,43 @@ public abstract class ClassInfo
         }
     }
 
-    public abstract void readWithTrack(ByteArray byteArray);
+    /**
+     * 读取对象的内容，并且这个对象本身要放入追踪
+     *
+     * @param byteArray
+     * @return
+     */
+    public Object readWithTrack(ByteArray byteArray)
+    {
+        try
+        {
+            Object instance = UNSAFE.allocateInstance(clazz);
+            addTracking(instance);
+            serializer.read(byteArray, instance);
+            return instance;
+        }
+        catch (InstantiationException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object readWithoutTrack(ByteArray byteArray)
+    {
+        try
+        {
+            Object instance = UNSAFE.allocateInstance(clazz);
+            serializer.read(byteArray, instance);
+            return instance;
+        }
+        catch (InstantiationException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object getInstanceById(int instanceId)
+    {
+        return tracking[instanceId];
+    }
 }

@@ -4,7 +4,10 @@ import com.jfirer.baseutil.reflect.ReflectUtil;
 import com.jfirer.fse.InternalByteArray;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
 
-import java.lang.invoke.*;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.nio.ByteOrder;
 import java.util.function.BiFunction;
 
@@ -802,7 +805,7 @@ public class ByteArray
         ensureNewWriterIndex(idx + 8 + numBytes);
         idx += writePositiveVarIntWithoutEnsure(numBytes);
         final long destAddr = BYTE_ARRAY_OFFSET + idx;
-        copyMemory(arr, arrOffset, array, destAddr, numBytes);
+        copyMemory(arr, BYTE_ARRAY_OFFSET + arrOffset, array, destAddr, numBytes);
         writerIndex = idx + numBytes;
     }
 
@@ -816,7 +819,7 @@ public class ByteArray
             throw new IndexOutOfBoundsException(String.format("readerIndex(%d) + length(%d) exceeds size(%d): %s", readerIdx, numBytes, writerIndex, this));
         }
         final byte[] arr = new byte[numBytes];
-        System.arraycopy(array, BYTE_ARRAY_OFFSET + readerIdx, arr, 0, numBytes);
+        System.arraycopy(array, readerIdx, arr, 0, numBytes);
         readerIndex = readerIdx + numBytes;
         return arr;
     }

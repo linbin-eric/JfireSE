@@ -5,13 +5,13 @@ import com.jfirer.se2.JfireSE;
 
 public class StaticClasInfo extends ClassInfo
 {
-    public StaticClasInfo(short classId, String className, Class<?> clazz, boolean refTracking)
+    public StaticClasInfo(short classId, Class<?> clazz, boolean refTracking)
     {
-        super(classId, className, clazz, refTracking);
+        super(classId, clazz, refTracking);
     }
 
     @Override
-    public void  write(ByteArray byteArray, Object instance)
+    public void write(ByteArray byteArray, Object instance)
     {
         if (refTrack)
         {
@@ -35,5 +35,11 @@ public class StaticClasInfo extends ClassInfo
             byteArray.writeVarInt(classId);
             serializer.writeBytes(byteArray, instance);
         }
+    }
+
+    @Override
+    public Object readWithTrack(ByteArray byteArray)
+    {
+        return null;
     }
 }

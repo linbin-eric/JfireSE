@@ -14,7 +14,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.Throughput)
-@Warmup(iterations = 2, time = 1)
+@Warmup(iterations = 2, time = 3)
 @Measurement(iterations = 3, time = 3)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Fork(1)
@@ -28,7 +28,7 @@ public class BenchMark
     Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
                             .withRefTracking(true).build();
-    JfireSE   jfireSE = JfireSE.build();
+    JfireSE   jfireSE = JfireSE.supportRefTracking(true).build();
 
     @Benchmark
     public void testNoCompile()

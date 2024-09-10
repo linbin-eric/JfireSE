@@ -6,5 +6,7 @@ public interface Serializer
 {
     void writeBytes(ByteArray byteArray, Object instance);
 
-    Object read(ByteArray stream);
+    void read(ByteArray stream, Object instance);
+
+
 }

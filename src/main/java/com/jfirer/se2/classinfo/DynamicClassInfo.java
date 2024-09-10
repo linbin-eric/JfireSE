@@ -16,9 +16,9 @@ public class DynamicClassInfo extends ClassInfo
      */
     private boolean firstSerialized = true;
 
-    public DynamicClassInfo(short classId, String className, Class<?> clazz, boolean refTracking)
+    public DynamicClassInfo(short classId, Class<?> clazz, boolean refTracking)
     {
-        super(classId, className, clazz, refTracking);
+        super(classId, clazz, refTracking);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class DynamicClassInfo extends ClassInfo
                 firstSerialized = true;
                 addTracking(instance);
                 byteArray.put(JfireSE.NAME_ID_CONTENT_TRACK);
-                byteArray.writeString(className);
+                byteArray.writeBytesWithSizeEmbedded(classNameBytes);
                 byteArray.writeVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }
@@ -65,7 +65,7 @@ public class DynamicClassInfo extends ClassInfo
             {
                 firstSerialized = true;
                 byteArray.put(JfireSE.NAME_ID_CONTENT_UN_TRACK);
-                byteArray.writeString(className);
+                byteArray.writeBytesWithSizeEmbedded(classNameBytes);
                 byteArray.writeVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }

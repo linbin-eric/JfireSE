@@ -58,7 +58,7 @@ public class JfireSEConfig
 
     private StaticClasInfo resolve(Class<?> clazz)
     {
-        StaticClasInfo staticClasInfo = new StaticClasInfo(staticClassId, clazz.getName(), clazz, refTracking);
+        StaticClasInfo staticClasInfo = new StaticClasInfo(staticClassId, clazz, refTracking);
         staticClassId++;
         return staticClasInfo;
     }

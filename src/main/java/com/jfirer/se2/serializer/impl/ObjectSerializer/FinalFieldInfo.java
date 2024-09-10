@@ -1,7 +1,5 @@
 package com.jfirer.se2.serializer.impl.ObjectSerializer;
 
-import com.jfirer.baseutil.reflect.ReflectUtil;
-import com.jfirer.baseutil.reflect.ValueAccessor;
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.JfireSEImpl;
@@ -11,12 +9,14 @@ import java.lang.reflect.Field;
 
 public class FinalFieldInfo extends FieldInfo
 {
-    private ClassInfo classInfo;
+    private ClassInfo   classInfo;
+    private JfireSEImpl jfireSE;
 
     public FinalFieldInfo(Field field, JfireSEImpl jfireSE)
     {
-        super(ReflectUtil.getClassId(field.getType()), new ValueAccessor(field));
-        classInfo = jfireSE.getForSerialize(field.getType());
+        super(field);
+        classInfo    = jfireSE.getForSerialize(field.getType());
+        this.jfireSE = jfireSE;
     }
 
     @Override
@@ -30,6 +30,39 @@ public class FinalFieldInfo extends FieldInfo
         else
         {
             classInfo.writeKnownClazz(byteArray, obj);
+        }
+    }
+
+    @Override
+    public void read(ByteArray byteArray, Object instance)
+    {
+        byte flag = byteArray.get();
+        if (flag == JfireSE.NULL)
+        {
+            accessor.setObject(instance, null);
+        }
+        else
+        {
+            switch (flag)
+            {
+                case JfireSE.instance_id ->
+                {
+                    int    instanceId = byteArray.readVarInt();
+                    Object property   = classInfo.getInstanceById(instanceId);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.content_track ->
+                {
+                    Object property = classInfo.readWithTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.content_un_track ->
+                {
+                    Object property = classInfo.readWithoutTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                default -> throw new RuntimeException("flag:" + flag);
+            }
         }
     }
 }

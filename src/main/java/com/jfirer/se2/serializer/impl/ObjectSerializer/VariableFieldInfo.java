@@ -1,7 +1,5 @@
 package com.jfirer.se2.serializer.impl.ObjectSerializer;
 
-import com.jfirer.baseutil.reflect.ReflectUtil;
-import com.jfirer.baseutil.reflect.ValueAccessor;
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.JfireSEImpl;
@@ -17,7 +15,7 @@ public class VariableFieldInfo extends FieldInfo
 
     public VariableFieldInfo(Field field, JfireSEImpl jfireSE)
     {
-        super(ReflectUtil.getClassId(field.getType()), new ValueAccessor(field));
+        super(field);
         classInfo    = jfireSE.getForSerialize(field.getType());
         this.jfireSE = jfireSE;
         if (field.getType().isInterface())
@@ -63,6 +61,77 @@ public class VariableFieldInfo extends FieldInfo
                 {
                     classInfo.write(byteArray, obj);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void read(ByteArray byteArray, Object instance)
+    {
+        byte flag = byteArray.get();
+        if (flag == JfireSE.NULL)
+        {
+            accessor.setObject(instance, null);
+        }
+        else
+        {
+            switch (flag)
+            {
+                case JfireSE.NAME_ID_CONTENT_TRACK ->
+                {
+                    byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                    int    classId        = byteArray.readVarInt();
+                    classInfo = jfireSE.getForDeSerialize(classNameBytes, classId);
+                    Object property = classInfo.readWithTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.NAME_ID_CONTENT_UN_TRACK ->
+                {
+                    byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                    int    classId   = byteArray.readVarInt();
+                    classInfo = jfireSE.getForDeSerialize(classNameBytes, classId);
+                    Object property = classInfo.readWithoutTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.ID_INSTANCE_ID ->
+                {
+                    int classId    = byteArray.readVarInt();
+                    int instanceId = byteArray.readVarInt();
+                    classInfo = jfireSE.getForDeSerialize(classId);
+                    Object proeprty = classInfo.getInstanceById(instanceId);
+                    accessor.setObject(instance, proeprty);
+                }
+                case JfireSE.id_content_track ->
+                {
+                    int classId = byteArray.readVarInt();
+                    classInfo = jfireSE.getForDeSerialize(classId);
+                    Object property = classInfo.readWithTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.id_content_un_track ->
+                {
+                    int classId = byteArray.readVarInt();
+                    classInfo = jfireSE.getForDeSerialize(classId);
+                    Object property = classInfo.readWithoutTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.instance_id ->
+                {
+                    int    instanceId = byteArray.readVarInt();
+                    Object property   = firstClassInfo.getInstanceById(instanceId);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.content_track ->
+                {
+                    Object property = firstClassInfo.readWithTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                case JfireSE.content_un_track ->
+                {
+                    Object property = firstClassInfo.readWithoutTrack(byteArray);
+                    accessor.setObject(instance, property);
+                }
+                default -> throw new RuntimeException("flag:" + flag);
             }
         }
     }
