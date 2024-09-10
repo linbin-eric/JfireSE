@@ -45,18 +45,18 @@ public class FinalFieldInfo extends FieldInfo
         {
             switch (flag)
             {
-                case JfireSE.instance_id ->
+                case JfireSE.INSTANCE_ID ->
                 {
                     int    instanceId = byteArray.readVarInt();
                     Object property   = classInfo.getInstanceById(instanceId);
                     accessor.setObject(instance, property);
                 }
-                case JfireSE.content_track ->
+                case JfireSE.CONTENT_TRACK ->
                 {
                     Object property = classInfo.readWithTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
-                case JfireSE.content_un_track ->
+                case JfireSE.CONTENT_UN_TRACK ->
                 {
                     Object property = classInfo.readWithoutTrack(byteArray);
                     accessor.setObject(instance, property);

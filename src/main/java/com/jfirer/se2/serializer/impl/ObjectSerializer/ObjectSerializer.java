@@ -7,7 +7,9 @@ import com.jfirer.baseutil.smc.model.ConstructorModel;
 import com.jfirer.baseutil.smc.model.FieldModel;
 import com.jfirer.baseutil.smc.model.MethodModel;
 import com.jfirer.se2.ByteArray;
+import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.JfireSEImpl;
+import com.jfirer.se2.classinfo.ClassInfo;
 import com.jfirer.se2.serializer.Serializer;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
 
@@ -20,9 +22,8 @@ import java.util.function.Predicate;
 
 public class ObjectSerializer implements Serializer
 {
-    private              Class<?>    clazz;
     private              FieldInfo[] fieldInfos;
-    static               int         COMPILE_COUNT = 1;
+    private static       int         COMPILE_COUNT = 1;
     private static final Unsafe      UNSAFE        = Unsafe.getUnsafe();
 
     public ObjectSerializer(Class<?> clazz, JfireSEImpl jfireSE)
@@ -96,14 +97,27 @@ public class ObjectSerializer implements Serializer
         COMPILE_COUNT++;
         classModel.addInterface(Serializer.class);
         classModel.addImport(Unsafe.class);
+        classModel.addImport(JfireSEImpl.class);
+        classModel.addImport(JfireSE.class);
+        classModel.addImport(Integer.class);
+        classModel.addImport(Short.class);
+        classModel.addImport(Byte.class);
+        classModel.addImport(Long.class);
+        classModel.addImport(Double.class);
+        classModel.addImport(Float.class);
+        classModel.addImport(Boolean.class);
+        classModel.addImport(Character.class);
+        classModel.addImport(String.class);
         classModel.addImport(List.class);
         classModel.addImport(FieldInfo.class);
         classModel.addImport(ByteArray.class);
         classModel.addField(new FieldModel("UNSAFE", Unsafe.class, "Unsafe.getUnsafe()", classModel));
+        classModel.addField(new FieldModel("jfireSE", JfireSEImpl.class, classModel));
         ConstructorModel constructorModel = new ConstructorModel(classModel);
         constructorModel.setParamTypes(Class.class, JfireSEImpl.class, List.class);
         constructorModel.setParamNames("clazz", "jfireSE", "list");
         StringBuilder constructorBody = new StringBuilder();
+        constructorBody.append("this.jfireSE=jfireSE;\r\n");
         try
         {
             MethodModel writeMethod = new MethodModel(Serializer.class.getDeclaredMethod("writeBytes", ByteArray.class, Object.class), classModel);
@@ -167,61 +181,401 @@ public class ObjectSerializer implements Serializer
                 {
                     switch (fieldInfo.classId)
                     {
-                        case ReflectUtil.PRIMITIVE_BYTE ->
+                        case ReflectUtil.CLASS_BYTE ->
                         {
-                            writeBody.append("byteArray.writeByte((Byte) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readByte());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Byte obj = (Byte)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.put(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.get());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_INT ->
+                        case ReflectUtil.CLASS_INT ->
                         {
-                            writeBody.append("byteArray.writeVarInt((Integer) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readVarInt());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Integer obj = (Integer)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeVarInt(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readVarInt());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_SHORT ->
+                        case ReflectUtil.CLASS_SHORT ->
                         {
-                            writeBody.append("byteArray.writeVarInt((Short) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", (short) byteArray.readVarInt());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Short obj = (Short)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeVarShort(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readVarShort());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_LONG ->
+                        case ReflectUtil.CLASS_LONG ->
                         {
-                            writeBody.append("byteArray.writeVarLong((Long) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readVarLong());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Long obj = (Long)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeVarLong(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readVarLong());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_FLOAT ->
+                        case ReflectUtil.CLASS_FLOAT ->
                         {
-                            writeBody.append("byteArray.writeFloat((Float) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readFloat());");
+                            writeBody.append("""
+                                                     {
+                                                       Float obj = (Float)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeFloat(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readFloat());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_DOUBLE ->
+                        case ReflectUtil.CLASS_DOUBLE ->
                         {
-                            writeBody.append("byteArray.writeDouble((Double) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readDouble());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Double obj = (Double)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeDouble(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readDouble());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_BOOL ->
+                        case ReflectUtil.CLASS_BOOL ->
                         {
-                            writeBody.append("byteArray.writeBoolean((Boolean) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readBoolean());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Boolean obj = (Boolean)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeBoolean(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readBoolean());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
-                        case ReflectUtil.PRIMITIVE_CHAR ->
+                        case ReflectUtil.CLASS_CHAR ->
                         {
-                            writeBody.append("byteArray.writeChar((Character) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readChar());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       Character obj = (Character)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeChar(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readChar());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
                         case ReflectUtil.CLASS_STRING ->
                         {
-                            writeBody.append("byteArray.writeString((String) UNSAFE.getObject(instance, " + l + "));\r\n");
-                            readBody.append("UNSAFE.putObject(instance," + l + ", byteArray.readString());\r\n");
+                            writeBody.append("""
+                                                     {
+                                                       String obj = (String)UNSAFE.getReference(instance,offset);
+                                                       if(obj==null)
+                                                       {
+                                                           byteArray.put(JfireSE.NULL);
+                                                       }
+                                                       else
+                                                       {
+                                                           byteArray.put(JfireSE.NOT_NULL);
+                                                           byteArray.writeString(obj);
+                                                       }
+                                                     }  
+                                                     """.replace("offset", String.valueOf(l)));
+                            readBody.append("""
+                                                    {
+                                                        if (byteArray.get() == JfireSE.NOT_NULL)
+                                                        {
+                                                            UNSAFE.putReference(instance,offset, byteArray.readString());
+                                                        }
+                                                    }
+                                                    """.replace("offset", String.valueOf(l)));
                         }
                         default -> throw new RuntimeException("不支持的类型");
                     }
                 }
-                else if (fieldInfo instanceof VariableFieldInfo || fieldInfo instanceof FinalFieldInfo)
+                else if (fieldInfo instanceof VariableFieldInfo)
                 {
-                    FieldModel fieldModel = new FieldModel("fieldInfo_$_" + fieldIndex, VariableFieldInfo.class, classModel);
-                    classModel.addField(fieldModel);
-                    constructorBody.append("fieldInfo_$_" + fieldIndex + "=(FieldInfo)list.get(" + fieldIndex + ");\r\n");
-                    writeBody.append("fieldInfo_$_" + fieldIndex + ".write(byteArray,instance);\r\n");
-                    readBody.append("fieldInfo_$_" + fieldIndex + ".read(byteArray,instance);\r\n");
+                    String     classInfoProperty      = "classInfo_$_" + fieldIndex;
+                    String     firstClassInfoProperty = "firstClassInfo_$_" + fieldIndex;
+                    FieldModel classInfoModel         = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
+                    FieldModel firstClassInfoModel    = new FieldModel(firstClassInfoProperty, ClassInfo.class, classModel);
+                    classModel.addField(classInfoModel, firstClassInfoModel);
+                    constructorBody.append(classInfoProperty + "=jfireSE.getForSerialize(((FieldInfo)list.get(" + fieldIndex + ")).getField().getType());\r\n");
+                    constructorBody.append(" if( ((FieldInfo)list.get(" + fieldIndex + ")).getField().getType().isInterface()) {");
+                    constructorBody.append(firstClassInfoProperty + "=null;\r\n}");
+                    constructorBody.append("else{\r\n");
+                    constructorBody.append(firstClassInfoProperty + "=" + classInfoProperty + ";\r\n}");
+                    String objName = "obj_" + fieldIndex;
+                    writeBody.append("Object " + objName + "= UNSAFE.getReference(instance," + l + ");\r\n");
+                    writeBody.append("if(" + objName + "==null){ byteArray.put(JfireSE.NULL);}\r\n");
+                    writeBody.append("else{\r\n");
+                    String objClassName = "objClass_$_" + fieldIndex;
+                    writeBody.append("Class " + objClassName + " = " + objName + ".getClass();\r\n");
+                    writeBody.append("if(" + objClassName + "==" + classInfoProperty + ".getClazz()){");
+                    writeBody.append("if(" + classInfoProperty + "==" + firstClassInfoProperty + "){\r\n");
+                    writeBody.append(classInfoProperty + ".writeKnownClazz(byteArray," + objName + ");\r\n");
+                    writeBody.append("}\r\n");
+                    writeBody.append("else{\r\n");
+                    writeBody.append(classInfoProperty + ".write(byteArray," + objName + ");\r\n");
+                    writeBody.append("}\r\n");
+                    writeBody.append("}");
+                    writeBody.append("else{");
+                    writeBody.append(classInfoProperty + "=" + "jfireSE.getForSerialize(" + objClassName + ");\r\n");
+                    writeBody.append("if(" + classInfoProperty + "==" + firstClassInfoProperty + "){\r\n");
+                    writeBody.append(classInfoProperty + ".writeKnownClazz(byteArray," + objName + ");\r\n");
+                    writeBody.append("}\r\n");
+                    writeBody.append("else{\r\n");
+                    writeBody.append(classInfoProperty + ".write(byteArray," + objName + ");\r\n");
+                    writeBody.append("}\r\n");
+                    writeBody.append("}\r\n");
+                    writeBody.append("}");
+                    String flagName = "flag_$_" + fieldIndex;
+                    readBody.append("byte " + flagName + " = byteArray.get();\r\n");
+                    readBody.append("if(" + flagName + "==JfireSE.NULL){UNSAFE.putReference(instance," + l + ",null);}\r\n");
+                    readBody.append("else{\r\n");
+                    readBody.append("switch(" + flagName + "){\r\n");
+                    readBody.append("""
+                                            case JfireSE.NAME_ID_CONTENT_TRACK->
+                                            {
+                                               byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                                               int    classId        = byteArray.readVarInt();
+                                               ClassInfo classInfo = jfireSE.getForDeSerialize(classNameBytes, classId);
+                                               Object property = classInfo.readWithTrack(byteArray);
+                                               UNSAFE.putReference(instance,offset, property);
+                                            }
+                                            """.replace("offset", String.valueOf(l)));
+                    readBody.append("""
+                                            case JfireSE.NAME_ID_CONTENT_UN_TRACK->
+                                            {
+                                                   byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded(); 
+                                                   int classId = byteArray.readVarInt();
+                                                   ClassInfo classInfo = jfireSE.getForDeSerialize(classNameBytes,classId);
+                                                   Object property = classInfo.readWithoutTrack(byteArray);
+                                                   UNSAFE.putReference(instance,offset, property);
+                                            }
+                                            """.replace("offset", String.valueOf(l)));
+                    readBody.append("""
+                                            case JfireSE.ID_INSTANCE_ID->
+                                            {
+                                                int classId = byteArray.readVarInt();
+                                                int instanceId = byteArray.readVarInt();
+                                                ClassInfo classInfo = jfireSE.getForDeSerialize(classId);
+                                                Object property = classInfo.getInstanceById(instanceId);
+                                                UNSAFE.putReference(instance,offset, property);
+                                             }
+                                            """.replace("offset", String.valueOf(l)));
+                    readBody.append("""
+                                            case JfireSE.ID_CONTENT_TRACK->
+                                            {
+                                               int classId = byteArray.readVarInt();
+                                               ClassInfo classInfo = jfireSE.getForDeSerialize(classId);
+                                               Object property = classInfo.readWithTrack(byteArray);
+                                               UNSAFE.putReference(instance,offset, property);
+                                            }
+                                            """.replace("offset", String.valueOf(l)));
+                    readBody.append("""
+                                            case JfireSE.ID_CONTENT_UN_TRACK->
+                                            {
+                                               int classId = byteArray.readVarInt();
+                                               ClassInfo classInfo = jfireSE.getForDeSerialize(classId);
+                                               Object property = classInfo.readWithoutTrack(byteArray);
+                                               UNSAFE.putReference(instance,offset, property);
+                                            }
+                                            """.replace("offset", String.valueOf(l)));
+                    readBody.append("""
+                                            case JfireSE.INSTANCE_ID ->
+                                            {
+                                               int instanceId = byteArray.readVarInt();
+                                               Object property   = firstClassInfo.getInstanceById(instanceId);
+                                               UNSAFE.putReference(instance,offset, property);
+                                            }    
+                                            """.replace("offset", String.valueOf(l))//
+                                               .replace("firstClassInfo", firstClassInfoProperty));
+                    readBody.append("""
+                                            case JfireSE.CONTENT_TRACK ->
+                                            {
+                                               Object property = firstClassInfo.readWithTrack(byteArray);
+                                               UNSAFE.putReference(instance,offset, property);
+                                            }
+                                            """.replace("offset", String.valueOf(l)).replace("firstClassInfo", firstClassInfoProperty));
+                    readBody.append("""
+                                            case JfireSE.CONTENT_UN_TRACK ->
+                                            {
+                                               Object property = firstClassInfo.readWithoutTrack(byteArray);
+                                               UNSAFE.putReference(instance,offset, property);
+                                            }
+                                            """.replace("offset", String.valueOf(l)).replace("firstClassInfo", firstClassInfoProperty));
+                    readBody.append("default -> throw new RuntimeException(\"flag:\" + " + flagName + ");\r\n");
+                    readBody.append("}\r\n");
+                    readBody.append("}\r\n");
+                }
+                else if (fieldInfo instanceof FinalFieldInfo)
+                {
+                    String     classInfoProperty = "classInfo_$_" + fieldIndex;
+                    FieldModel classInfoModel    = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
+                    classModel.addField(classInfoModel);
+                    constructorBody.append(classInfoProperty + "=jfireSE.getForSerialize(((FieldInfo)list.get(" + fieldIndex + ")).getField().getType());\r\n");
+                    writeBody.append("""
+                                             {
+                                                 Object obj = UNSAFE.getReference(instance,offset);
+                                                        if (obj == null)
+                                                        {
+                                                            byteArray.put(JfireSE.NULL);
+                                                        }
+                                                        else
+                                                        {
+                                                            classInfo.writeKnownClazz(byteArray, obj);
+                                                        }
+                                             }
+                                             """.replace("offset", String.valueOf(l)).replace("classInfo", classInfoProperty));
+                    readBody.append("""
+                                            {
+                                                byte flag = byteArray.get();
+                                                if (flag == JfireSE.NULL)
+                                                {
+                                                    UNSAFE.putReference(instance,offset,null);
+                                                }
+                                                else
+                                                {
+                                                        switch (flag)
+                                                        {
+                                                            case JfireSE.INSTANCE_ID ->
+                                                            {
+                                                                int    instanceId = byteArray.readVarInt();
+                                                                Object property   = classInfo.getInstanceById(instanceId);
+                                                                UNSAFE.putReference(instance,offset,property);
+                                                            }
+                                                            case JfireSE.CONTENT_TRACK ->
+                                                            {
+                                                                Object property = classInfo.readWithTrack(byteArray);
+                                                                UNSAFE.putReference(instance,offset,property);
+                                                            }
+                                                            case JfireSE.CONTENT_UN_TRACK ->
+                                                            {
+                                                                Object property = classInfo.readWithoutTrack(byteArray);
+                                                                UNSAFE.putReference(instance,offset,property);
+                                                            }
+                                                            default -> throw new RuntimeException("flag:" + flag);
+                                                        }       
+                                                }
+                                            }
+                                            """.replace("offset", String.valueOf(l)).replace("classInfo", classInfoProperty));
                 }
                 fieldIndex++;
             }
@@ -231,9 +585,9 @@ public class ObjectSerializer implements Serializer
             readMethod.setBody(readBody.toString());
             classModel.putMethodModel(writeMethod);
             classModel.putMethodModel(readMethod);
-            CompileHelper compiler = new CompileHelper(Thread.currentThread().getContextClassLoader());
-            Class<?>           compile  = compiler.compile(classModel);
-            Serializer compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSEImpl.class, List.class).newInstance(clazz, jfireSE, parse);
+            CompileHelper compiler                 = new CompileHelper(Thread.currentThread().getContextClassLoader());
+            Class<?>      compile                  = compiler.compile(classModel);
+            Serializer    compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSEImpl.class, List.class).newInstance(clazz, jfireSE, parse);
             return compiledObjectSerializer;
         }
         catch (NoSuchMethodException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e)

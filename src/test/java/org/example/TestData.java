@@ -1,19 +1,23 @@
 package org.example;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class TestData
 {
-    private int     a = 213212312;
-    private boolean b = false;
-    private char    c = 'c';
-    private byte    d = 0x11;
-    private short   e = 24;
-    private long    f = 1213124131312321L;
-    private double  g = 231321.2132;
-    private float   h = (float) 4986.2;
-    private String  i = "123452312316789a";
+    private int         a = 213212312;
+    private boolean     b = false;
+    private char        c = 'c';
+    private byte        d = 0x11;
+    private short       e = 24;
+    private long        f = 1213124131312321L;
+    private double      g = 231321.2132;
+    private float       h = (float) 4986.2;
+    private String      i = "123452312316789a";
+    private TestDataSm  testDataSm;
+    private TestDataSm2 testDataSm2;
 //    private int[]     j = new int[]{1, 2, 4, 5};
 //    private boolean[] k = new boolean[]{true, false, true, false, false, false, true};
 //    private char[]    l = new char[]{'a', 'v', 'q', 'j', 'h', 'e', 'f'};
@@ -23,6 +27,4 @@ public class TestData
 //    private double[]  p = new double[]{6468613646.48646d, 4646.456d, 546864648867.466d};
 //    private float[]   q = new float[]{46486.2f, 49849.2f, 646854.6f};
 //    private String[]  r = new String[]{"abcdf12345", "abdfcgf12323"};
-
-
 }

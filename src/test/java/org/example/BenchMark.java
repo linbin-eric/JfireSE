@@ -23,7 +23,7 @@ public class BenchMark
 {
     Fse       fse     = new Fse();
     Fse       fse_3   = new Fse().useCompile();
-    TestData  data    = new TestData();
+    TestData  data    = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
     ByteArray buf     = ByteArray.allocate(100);
     Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
@@ -31,7 +31,7 @@ public class BenchMark
     JfireSE   jfireSE = JfireSE.supportRefTracking(true).build();
 
     @Benchmark
-    public void testNoCompile()
+    public void testFSENoCompile()
     {
         buf.clear();
         fse.serialize(data, buf);
@@ -44,7 +44,7 @@ public class BenchMark
     }
 
     @Benchmark
-    public void testDirectCompile()
+    public void testFSEDirectCompile()
     {
         buf.clear();
         fse_3.serialize(data, buf);

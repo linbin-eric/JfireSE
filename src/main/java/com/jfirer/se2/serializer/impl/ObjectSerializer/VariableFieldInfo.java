@@ -101,32 +101,32 @@ public class VariableFieldInfo extends FieldInfo
                     Object proeprty = classInfo.getInstanceById(instanceId);
                     accessor.setObject(instance, proeprty);
                 }
-                case JfireSE.id_content_track ->
+                case JfireSE.ID_CONTENT_TRACK ->
                 {
                     int classId = byteArray.readVarInt();
                     classInfo = jfireSE.getForDeSerialize(classId);
                     Object property = classInfo.readWithTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
-                case JfireSE.id_content_un_track ->
+                case JfireSE.ID_CONTENT_UN_TRACK ->
                 {
                     int classId = byteArray.readVarInt();
                     classInfo = jfireSE.getForDeSerialize(classId);
                     Object property = classInfo.readWithoutTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
-                case JfireSE.instance_id ->
+                case JfireSE.INSTANCE_ID ->
                 {
                     int    instanceId = byteArray.readVarInt();
                     Object property   = firstClassInfo.getInstanceById(instanceId);
                     accessor.setObject(instance, property);
                 }
-                case JfireSE.content_track ->
+                case JfireSE.CONTENT_TRACK ->
                 {
                     Object property = firstClassInfo.readWithTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
-                case JfireSE.content_un_track ->
+                case JfireSE.CONTENT_UN_TRACK ->
                 {
                     Object property = firstClassInfo.readWithoutTrack(byteArray);
                     accessor.setObject(instance, property);

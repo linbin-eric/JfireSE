@@ -12,7 +12,6 @@ public class SerializerFactory
 
     public Serializer getSerializer(Class<?> clazz, JfireSEImpl jfireSE)
     {
-//        ObjectSerializer objectSerializer = new ObjectSerializer(clazz, jfireSE);
         Serializer objectSerializer = ObjectSerializer.buildCompileVersion(clazz, jfireSE);
         store.putIfAbsent(clazz, objectSerializer);
         return objectSerializer;

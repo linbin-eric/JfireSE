@@ -4,9 +4,11 @@ import com.jfirer.baseutil.reflect.ReflectUtil;
 import com.jfirer.baseutil.reflect.ValueAccessor;
 import com.jfirer.baseutil.smc.compiler.CompileHelper;
 import com.jfirer.se2.ByteArray;
+import lombok.Data;
 
 import java.lang.reflect.Field;
 
+@Data
 public abstract class FieldInfo
 {
     protected final      int           classId;

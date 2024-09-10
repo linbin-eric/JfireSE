@@ -7,11 +7,11 @@ public interface JfireSE
     byte NAME_ID_CONTENT_TRACK    = 2;
     byte NAME_ID_CONTENT_UN_TRACK = 3;
     byte ID_INSTANCE_ID           = 4;
-    byte id_content_track         = 5;
-    byte id_content_un_track      = 6;
-    byte instance_id              = 7;
-    byte content_track            = 8;
-    byte content_un_track         = 9;
+    byte ID_CONTENT_TRACK         = 5;
+    byte ID_CONTENT_UN_TRACK      = 6;
+    byte INSTANCE_ID              = 7;
+    byte CONTENT_TRACK            = 8;
+    byte CONTENT_UN_TRACK         = 9;
 
     static JfireSEConfig supportRefTracking(boolean support)
     {

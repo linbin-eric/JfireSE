@@ -70,18 +70,18 @@ public abstract class ClassInfo
             int index = addTracking(instance);
             if (index == -1)
             {
-                byteArray.put(JfireSE.content_track);
+                byteArray.put(JfireSE.CONTENT_TRACK);
                 serializer.writeBytes(byteArray, instance);
             }
             else
             {
-                byteArray.put(JfireSE.instance_id);
+                byteArray.put(JfireSE.INSTANCE_ID);
                 byteArray.writeVarInt(index);
             }
         }
         else
         {
-            byteArray.put(JfireSE.content_un_track);
+            byteArray.put(JfireSE.CONTENT_UN_TRACK);
             serializer.writeBytes(byteArray, instance);
         }
     }

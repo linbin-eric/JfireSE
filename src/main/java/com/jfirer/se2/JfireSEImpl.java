@@ -27,6 +27,7 @@ public class JfireSEImpl implements JfireSE
     private       ByteArray                byteArray         = new ByteArray(1000);
     private       ClassInfo                classInfoCache;
     private       Map<Class<?>, ClassInfo> classInfoMap      = new HashMap<>();
+    private       Map<byte[], ClassInfo>   classInfoCacheMap = new HashMap<>();
 
     public JfireSEImpl(boolean refTracking, StaticClasInfo[] staticClasInfos)
     {
@@ -116,13 +117,13 @@ public class JfireSEImpl implements JfireSE
                 int    classId        = stream.readVarInt();
                 return getForDeSerialize(classNameBytes, classId).readWithoutTrack(stream);
             }
-            case JfireSE.id_content_track ->
+            case JfireSE.ID_CONTENT_TRACK ->
             {
                 int       classId   = stream.readVarInt();
                 ClassInfo classInfo = getForDeSerialize(classId);
                 return classInfo.readWithTrack(stream);
             }
-            case JfireSE.id_content_un_track ->
+            case JfireSE.ID_CONTENT_UN_TRACK ->
             {
                 int       classId   = stream.readVarInt();
                 ClassInfo classInfo = getForDeSerialize(classId);

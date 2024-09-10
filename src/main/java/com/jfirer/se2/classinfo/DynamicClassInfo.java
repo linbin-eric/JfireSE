@@ -47,7 +47,7 @@ public class DynamicClassInfo extends ClassInfo
                 int i = addTracking(instance);
                 if (i == -1)
                 {
-                    byteArray.put(JfireSE.id_content_track);
+                    byteArray.put(JfireSE.ID_CONTENT_TRACK);
                     byteArray.writeVarInt(classId);
                     serializer.writeBytes(byteArray, instance);
                 }
@@ -71,7 +71,7 @@ public class DynamicClassInfo extends ClassInfo
             }
             else
             {
-                byteArray.put(JfireSE.id_content_un_track);
+                byteArray.put(JfireSE.ID_CONTENT_UN_TRACK);
                 byteArray.writeVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }
