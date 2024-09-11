@@ -40,7 +40,7 @@ public class JfireSEImpl implements JfireSE
         dyncmicClassId = staticClassId + 1;
     }
 
-    public ClassInfo getForSerialize(Class<?> clazz)
+    public ClassInfo getOrCreateClassInfo(Class<?> clazz)
     {
         if (classInfoCache != null && classInfoCache.getClazz() == clazz)
         {
@@ -85,7 +85,7 @@ public class JfireSEImpl implements JfireSE
             byteArray.clear();
             return array;
         }
-        ClassInfo classInfo = getForSerialize(instance.getClass());
+        ClassInfo classInfo = getOrCreateClassInfo(instance.getClass());
         classInfo.write(byteArray, instance);
         byte[] array = byteArray.toArray();
         byteArray.clear();
@@ -107,38 +107,38 @@ public class JfireSEImpl implements JfireSE
             case JfireSE.NAME_ID_CONTENT_TRACK ->
             {
                 byte[]    classNameBytes = stream.readBytesWithSizeEmbedded();
-                int       classId        = stream.readVarInt();
-                ClassInfo classInfo      = getForDeSerialize(classNameBytes, classId);
+                int       classId        = stream.readPositiveVarInt();
+                ClassInfo classInfo      = find(classNameBytes, classId);
                 return classInfo.readWithTrack(stream);
             }
             case JfireSE.NAME_ID_CONTENT_UN_TRACK ->
             {
                 byte[] classNameBytes = stream.readBytesWithSizeEmbedded();
-                int    classId        = stream.readVarInt();
-                return getForDeSerialize(classNameBytes, classId).readWithoutTrack(stream);
+                int    classId        = stream.readPositiveVarInt();
+                return find(classNameBytes, classId).readWithoutTrack(stream);
             }
             case JfireSE.ID_CONTENT_TRACK ->
             {
-                int       classId   = stream.readVarInt();
-                ClassInfo classInfo = getForDeSerialize(classId);
+                int       classId   = stream.readPositiveVarInt();
+                ClassInfo classInfo = find(classId);
                 return classInfo.readWithTrack(stream);
             }
             case JfireSE.ID_CONTENT_UN_TRACK ->
             {
-                int       classId   = stream.readVarInt();
-                ClassInfo classInfo = getForDeSerialize(classId);
+                int       classId   = stream.readPositiveVarInt();
+                ClassInfo classInfo = find(classId);
                 return classInfo.readWithoutTrack(stream);
             }
             default -> throw new RuntimeException("未知的序列化类型");
         }
     }
 
-    public ClassInfo getForDeSerialize(byte[] classNameBytes, int classId)
+    public ClassInfo find(byte[] classNameBytes, int classId)
     {
         try
         {
             Class<?>  clazz     = Class.forName(new String(classNameBytes, StandardCharsets.UTF_8));
-            ClassInfo classInfo = getForSerialize(clazz);
+            ClassInfo classInfo = getOrCreateClassInfo(clazz);
             if (deSerializedClassInfos == null)
             {
                 deSerializedClassInfos          = new ClassInfo[classId + 1];
@@ -165,7 +165,7 @@ public class JfireSEImpl implements JfireSE
         }
     }
 
-    public ClassInfo getForDeSerialize(int classId)
+    public ClassInfo find(int classId)
     {
         return deSerializedClassInfos[classId];
     }

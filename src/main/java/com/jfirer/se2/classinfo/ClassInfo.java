@@ -76,7 +76,7 @@ public abstract class ClassInfo
             else
             {
                 byteArray.put(JfireSE.INSTANCE_ID);
-                byteArray.writeVarInt(index);
+                byteArray.writePositiveVarInt(index);
             }
         }
         else

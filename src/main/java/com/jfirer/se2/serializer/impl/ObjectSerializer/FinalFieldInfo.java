@@ -15,7 +15,7 @@ public class FinalFieldInfo extends FieldInfo
     public FinalFieldInfo(Field field, JfireSEImpl jfireSE)
     {
         super(field);
-        classInfo    = jfireSE.getForSerialize(field.getType());
+        classInfo    = jfireSE.getOrCreateClassInfo(field.getType());
         this.jfireSE = jfireSE;
     }
 
@@ -47,7 +47,7 @@ public class FinalFieldInfo extends FieldInfo
             {
                 case JfireSE.INSTANCE_ID ->
                 {
-                    int    instanceId = byteArray.readVarInt();
+                    int    instanceId = byteArray.readPositiveVarInt();
                     Object property   = classInfo.getInstanceById(instanceId);
                     accessor.setObject(instance, property);
                 }

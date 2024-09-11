@@ -2,6 +2,7 @@ package org.example;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
+import io.fury.Fury;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,6 +35,15 @@ public class FunctionTest
         byte[]  bytes   = jfireSE.write(testData);
         Assert.assertEquals(testData, jfireSE.read(bytes));
         Assert.assertEquals(sm, testData.getTestDataSm());
+    }
+
+    @Test
+    public void test3()
+    {
+        Fury fury = Fury.builder().requireClassRegistration(false).build();
+        TestData[] data = new TestData[2];
+        data[0] = new TestData();
+        fury.serialize(data);
     }
 
 

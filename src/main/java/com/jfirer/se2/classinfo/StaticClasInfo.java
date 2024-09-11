@@ -19,27 +19,21 @@ public class StaticClasInfo extends ClassInfo
             if (i == -1)
             {
                 byteArray.put(JfireSE.ID_CONTENT_TRACK);
-                byteArray.writeVarInt(classId);
+                byteArray.writePositiveVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }
             else
             {
                 byteArray.put(JfireSE.ID_INSTANCE_ID);
-                byteArray.writeVarInt(classId);
-                byteArray.writeVarInt(i);
+                byteArray.writePositiveVarInt(classId);
+                byteArray.writePositiveVarInt(i);
             }
         }
         else
         {
             byteArray.put(JfireSE.ID_CONTENT_UN_TRACK);
-            byteArray.writeVarInt(classId);
+            byteArray.writePositiveVarInt(classId);
             serializer.writeBytes(byteArray, instance);
         }
-    }
-
-    @Override
-    public Object readWithTrack(ByteArray byteArray)
-    {
-        return null;
     }
 }

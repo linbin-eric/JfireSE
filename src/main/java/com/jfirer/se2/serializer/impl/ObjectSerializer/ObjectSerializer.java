@@ -41,11 +41,11 @@ public class ObjectSerializer implements Serializer
     }
 
     @Override
-    public void read(ByteArray stream, Object instance)
+    public void read(ByteArray byteArray, Object instance)
     {
         for (FieldInfo each : fieldInfos)
         {
-            each.read(stream, instance);
+            each.read(byteArray, instance);
         }
     }
 
@@ -416,7 +416,7 @@ public class ObjectSerializer implements Serializer
                     FieldModel classInfoModel         = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
                     FieldModel firstClassInfoModel    = new FieldModel(firstClassInfoProperty, ClassInfo.class, classModel);
                     classModel.addField(classInfoModel, firstClassInfoModel);
-                    constructorBody.append(classInfoProperty + "=jfireSE.getForSerialize(((FieldInfo)list.get(" + fieldIndex + ")).getField().getType());\r\n");
+                    constructorBody.append(classInfoProperty + "=jfireSE.getOrCreateClassInfo(((FieldInfo)list.get(" + fieldIndex + ")).getField().getType());\r\n");
                     constructorBody.append(" if( ((FieldInfo)list.get(" + fieldIndex + ")).getField().getType().isInterface()) {");
                     constructorBody.append(firstClassInfoProperty + "=null;\r\n}");
                     constructorBody.append("else{\r\n");
@@ -436,7 +436,7 @@ public class ObjectSerializer implements Serializer
                     writeBody.append("}\r\n");
                     writeBody.append("}");
                     writeBody.append("else{");
-                    writeBody.append(classInfoProperty + "=" + "jfireSE.getForSerialize(" + objClassName + ");\r\n");
+                    writeBody.append(classInfoProperty + "=" + "jfireSE.getOrCreateClassInfo(" + objClassName + ");\r\n");
                     writeBody.append("if(" + classInfoProperty + "==" + firstClassInfoProperty + "){\r\n");
                     writeBody.append(classInfoProperty + ".writeKnownClazz(byteArray," + objName + ");\r\n");
                     writeBody.append("}\r\n");
@@ -454,8 +454,8 @@ public class ObjectSerializer implements Serializer
                                             case JfireSE.NAME_ID_CONTENT_TRACK->
                                             {
                                                byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
-                                               int    classId        = byteArray.readVarInt();
-                                               ClassInfo classInfo = jfireSE.getForDeSerialize(classNameBytes, classId);
+                                               int    classId        = byteArray.readPositiveVarInt();
+                                               ClassInfo classInfo = jfireSE.find(classNameBytes, classId);
                                                Object property = classInfo.readWithTrack(byteArray);
                                                UNSAFE.putReference(instance,offset, property);
                                             }
@@ -464,8 +464,8 @@ public class ObjectSerializer implements Serializer
                                             case JfireSE.NAME_ID_CONTENT_UN_TRACK->
                                             {
                                                    byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded(); 
-                                                   int classId = byteArray.readVarInt();
-                                                   ClassInfo classInfo = jfireSE.getForDeSerialize(classNameBytes,classId);
+                                                   int classId = byteArray.readPositiveVarInt();
+                                                   ClassInfo classInfo = jfireSE.find(classNameBytes,classId);
                                                    Object property = classInfo.readWithoutTrack(byteArray);
                                                    UNSAFE.putReference(instance,offset, property);
                                             }
@@ -473,9 +473,9 @@ public class ObjectSerializer implements Serializer
                     readBody.append("""
                                             case JfireSE.ID_INSTANCE_ID->
                                             {
-                                                int classId = byteArray.readVarInt();
-                                                int instanceId = byteArray.readVarInt();
-                                                ClassInfo classInfo = jfireSE.getForDeSerialize(classId);
+                                                int classId = byteArray.readPositiveVarInt();
+                                                int instanceId = byteArray.readPositiveVarInt();
+                                                ClassInfo classInfo = jfireSE.find(classId);
                                                 Object property = classInfo.getInstanceById(instanceId);
                                                 UNSAFE.putReference(instance,offset, property);
                                              }
@@ -483,8 +483,8 @@ public class ObjectSerializer implements Serializer
                     readBody.append("""
                                             case JfireSE.ID_CONTENT_TRACK->
                                             {
-                                               int classId = byteArray.readVarInt();
-                                               ClassInfo classInfo = jfireSE.getForDeSerialize(classId);
+                                               int classId = byteArray.readPositiveVarInt();
+                                               ClassInfo classInfo = jfireSE.find(classId);
                                                Object property = classInfo.readWithTrack(byteArray);
                                                UNSAFE.putReference(instance,offset, property);
                                             }
@@ -492,8 +492,8 @@ public class ObjectSerializer implements Serializer
                     readBody.append("""
                                             case JfireSE.ID_CONTENT_UN_TRACK->
                                             {
-                                               int classId = byteArray.readVarInt();
-                                               ClassInfo classInfo = jfireSE.getForDeSerialize(classId);
+                                               int classId = byteArray.readPositiveVarInt();
+                                               ClassInfo classInfo = jfireSE.find(classId);
                                                Object property = classInfo.readWithoutTrack(byteArray);
                                                UNSAFE.putReference(instance,offset, property);
                                             }
@@ -501,7 +501,7 @@ public class ObjectSerializer implements Serializer
                     readBody.append("""
                                             case JfireSE.INSTANCE_ID ->
                                             {
-                                               int instanceId = byteArray.readVarInt();
+                                               int instanceId = byteArray.readPositiveVarInt();
                                                Object property   = firstClassInfo.getInstanceById(instanceId);
                                                UNSAFE.putReference(instance,offset, property);
                                             }    
@@ -530,7 +530,7 @@ public class ObjectSerializer implements Serializer
                     String     classInfoProperty = "classInfo_$_" + fieldIndex;
                     FieldModel classInfoModel    = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
                     classModel.addField(classInfoModel);
-                    constructorBody.append(classInfoProperty + "=jfireSE.getForSerialize(((FieldInfo)list.get(" + fieldIndex + ")).getField().getType());\r\n");
+                    constructorBody.append(classInfoProperty + "=jfireSE.getOrCreateClassInfo(((FieldInfo)list.get(" + fieldIndex + ")).getField().getType());\r\n");
                     writeBody.append("""
                                              {
                                                  Object obj = UNSAFE.getReference(instance,offset);
@@ -557,7 +557,7 @@ public class ObjectSerializer implements Serializer
                                                         {
                                                             case JfireSE.INSTANCE_ID ->
                                                             {
-                                                                int    instanceId = byteArray.readVarInt();
+                                                                int    instanceId = byteArray.readPositiveVarInt();
                                                                 Object property   = classInfo.getInstanceById(instanceId);
                                                                 UNSAFE.putReference(instance,offset,property);
                                                             }

@@ -16,7 +16,7 @@ public class VariableFieldInfo extends FieldInfo
     public VariableFieldInfo(Field field, JfireSEImpl jfireSE)
     {
         super(field);
-        classInfo    = jfireSE.getForSerialize(field.getType());
+        classInfo    = jfireSE.getOrCreateClassInfo(field.getType());
         this.jfireSE = jfireSE;
         if (field.getType().isInterface())
         {
@@ -52,7 +52,7 @@ public class VariableFieldInfo extends FieldInfo
             }
             else
             {
-                classInfo = jfireSE.getForSerialize(objClass);
+                classInfo = jfireSE.getOrCreateClassInfo(objClass);
                 if (classInfo == firstClassInfo)
                 {
                     classInfo.writeKnownClazz(byteArray, obj);
@@ -80,44 +80,44 @@ public class VariableFieldInfo extends FieldInfo
                 case JfireSE.NAME_ID_CONTENT_TRACK ->
                 {
                     byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
-                    int    classId        = byteArray.readVarInt();
-                    classInfo = jfireSE.getForDeSerialize(classNameBytes, classId);
+                    int    classId        = byteArray.readPositiveVarInt();
+                    classInfo = jfireSE.find(classNameBytes, classId);
                     Object property = classInfo.readWithTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
                 case JfireSE.NAME_ID_CONTENT_UN_TRACK ->
                 {
                     byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
-                    int    classId   = byteArray.readVarInt();
-                    classInfo = jfireSE.getForDeSerialize(classNameBytes, classId);
+                    int    classId   = byteArray.readPositiveVarInt();
+                    classInfo = jfireSE.find(classNameBytes, classId);
                     Object property = classInfo.readWithoutTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
                 case JfireSE.ID_INSTANCE_ID ->
                 {
-                    int classId    = byteArray.readVarInt();
-                    int instanceId = byteArray.readVarInt();
-                    classInfo = jfireSE.getForDeSerialize(classId);
+                    int classId    = byteArray.readPositiveVarInt();
+                    int instanceId = byteArray.readPositiveVarInt();
+                    classInfo = jfireSE.find(classId);
                     Object proeprty = classInfo.getInstanceById(instanceId);
                     accessor.setObject(instance, proeprty);
                 }
                 case JfireSE.ID_CONTENT_TRACK ->
                 {
-                    int classId = byteArray.readVarInt();
-                    classInfo = jfireSE.getForDeSerialize(classId);
+                    int classId = byteArray.readPositiveVarInt();
+                    classInfo = jfireSE.find(classId);
                     Object property = classInfo.readWithTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
                 case JfireSE.ID_CONTENT_UN_TRACK ->
                 {
-                    int classId = byteArray.readVarInt();
-                    classInfo = jfireSE.getForDeSerialize(classId);
+                    int classId = byteArray.readPositiveVarInt();
+                    classInfo = jfireSE.find(classId);
                     Object property = classInfo.readWithoutTrack(byteArray);
                     accessor.setObject(instance, property);
                 }
                 case JfireSE.INSTANCE_ID ->
                 {
-                    int    instanceId = byteArray.readVarInt();
+                    int    instanceId = byteArray.readPositiveVarInt();
                     Object property   = firstClassInfo.getInstanceById(instanceId);
                     accessor.setObject(instance, property);
                 }

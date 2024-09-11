@@ -39,7 +39,7 @@ public class DynamicClassInfo extends ClassInfo
                 addTracking(instance);
                 byteArray.put(JfireSE.NAME_ID_CONTENT_TRACK);
                 byteArray.writeBytesWithSizeEmbedded(classNameBytes);
-                byteArray.writeVarInt(classId);
+                byteArray.writePositiveVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }
             else
@@ -48,14 +48,14 @@ public class DynamicClassInfo extends ClassInfo
                 if (i == -1)
                 {
                     byteArray.put(JfireSE.ID_CONTENT_TRACK);
-                    byteArray.writeVarInt(classId);
+                    byteArray.writePositiveVarInt(classId);
                     serializer.writeBytes(byteArray, instance);
                 }
                 else
                 {
                     byteArray.put(JfireSE.ID_INSTANCE_ID);
-                    byteArray.writeVarInt(classId);
-                    byteArray.writeVarInt(i);
+                    byteArray.writePositiveVarInt(classId);
+                    byteArray.writePositiveVarInt(i);
                 }
             }
         }
@@ -66,13 +66,13 @@ public class DynamicClassInfo extends ClassInfo
                 firstSerialized = true;
                 byteArray.put(JfireSE.NAME_ID_CONTENT_UN_TRACK);
                 byteArray.writeBytesWithSizeEmbedded(classNameBytes);
-                byteArray.writeVarInt(classId);
+                byteArray.writePositiveVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }
             else
             {
                 byteArray.put(JfireSE.ID_CONTENT_UN_TRACK);
-                byteArray.writeVarInt(classId);
+                byteArray.writePositiveVarInt(classId);
                 serializer.writeBytes(byteArray, instance);
             }
         }
