@@ -18,11 +18,6 @@ public interface JfireSE
         return new JfireSEConfig().setRefTracking(support);
     }
 
-    static JfireSEConfig useCompile()
-    {
-        return new JfireSEConfig().useCompile();
-    }
-
     static JfireSEConfig staticRegisterClass(Class<?> clazz)
     {
         return new JfireSEConfig().staticRegisterClass(clazz);

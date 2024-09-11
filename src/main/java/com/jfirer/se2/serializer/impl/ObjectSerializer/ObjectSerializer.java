@@ -10,6 +10,7 @@ import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.JfireSEImpl;
 import com.jfirer.se2.classinfo.ClassInfo;
+import com.jfirer.se2.classinfo.RefTracking;
 import com.jfirer.se2.serializer.Serializer;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
 
@@ -22,13 +23,15 @@ import java.util.function.Predicate;
 
 public class ObjectSerializer implements Serializer
 {
-    private              FieldInfo[] fieldInfos;
+    private final        FieldInfo[] fieldInfos;
+    private final        Class<?>    clazz;
     private static       int         COMPILE_COUNT = 1;
     private static final Unsafe      UNSAFE        = Unsafe.getUnsafe();
 
     public ObjectSerializer(Class<?> clazz, JfireSEImpl jfireSE)
     {
         fieldInfos = parse(clazz, jfireSE).toArray(FieldInfo[]::new);
+        this.clazz = clazz;
     }
 
     @Override
@@ -41,11 +44,24 @@ public class ObjectSerializer implements Serializer
     }
 
     @Override
-    public void read(ByteArray byteArray, Object instance)
+    public Object read(ByteArray byteArray, RefTracking refTracking)
     {
-        for (FieldInfo each : fieldInfos)
+        try
         {
-            each.read(byteArray, instance);
+            Object instance = UNSAFE.allocateInstance(clazz);
+            if (refTracking != null)
+            {
+                refTracking.addTracking(instance);
+            }
+            for (FieldInfo each : fieldInfos)
+            {
+                each.read(byteArray, instance);
+            }
+            return instance;
+        }
+        catch (InstantiationException e)
+        {
+            throw new RuntimeException(e);
         }
     }
 
@@ -97,6 +113,7 @@ public class ObjectSerializer implements Serializer
         COMPILE_COUNT++;
         classModel.addInterface(Serializer.class);
         classModel.addImport(Unsafe.class);
+        classModel.addImport(RefTracking.class);
         classModel.addImport(JfireSEImpl.class);
         classModel.addImport(JfireSE.class);
         classModel.addImport(Integer.class);
@@ -113,18 +130,21 @@ public class ObjectSerializer implements Serializer
         classModel.addImport(ByteArray.class);
         classModel.addField(new FieldModel("UNSAFE", Unsafe.class, "Unsafe.getUnsafe()", classModel));
         classModel.addField(new FieldModel("jfireSE", JfireSEImpl.class, classModel));
+        classModel.addField(new FieldModel("clazz", Class.class, classModel));
         ConstructorModel constructorModel = new ConstructorModel(classModel);
         constructorModel.setParamTypes(Class.class, JfireSEImpl.class, List.class);
         constructorModel.setParamNames("clazz", "jfireSE", "list");
         StringBuilder constructorBody = new StringBuilder();
-        constructorBody.append("this.jfireSE=jfireSE;\r\n");
+        constructorBody.append("""
+                                       this.jfireSE=jfireSE;
+                                       this.clazz=clazz;""");
         try
         {
             MethodModel writeMethod = new MethodModel(Serializer.class.getDeclaredMethod("writeBytes", ByteArray.class, Object.class), classModel);
             writeMethod.setParamterNames("byteArray", "instance");
             StringBuilder writeBody  = new StringBuilder();
-            MethodModel   readMethod = new MethodModel(Serializer.class.getDeclaredMethod("read", ByteArray.class, Object.class), classModel);
-            readMethod.setParamterNames("byteArray", "instance");
+            MethodModel   readMethod = new MethodModel(Serializer.class.getDeclaredMethod("read", ByteArray.class, RefTracking.class), classModel);
+            readMethod.setParamterNames("byteArray", "refTracking");
             StringBuilder readBody   = new StringBuilder();
             int           fieldIndex = 0;
             for (FieldInfo fieldInfo : parse)
@@ -582,7 +602,20 @@ public class ObjectSerializer implements Serializer
             constructorModel.setBody(constructorBody.toString());
             classModel.addConstructor(constructorModel);
             writeMethod.setBody(writeBody.toString());
-            readMethod.setBody(readBody.toString());
+            readBody.append("return instance;\r\n");
+            readMethod.setBody("""
+                                       Object instance; 
+                                       try{
+                                          instance = UNSAFE.allocateInstance(clazz);
+                                        }catch (InstantiationException e)
+                                               {
+                                                   throw new RuntimeException(e);
+                                               }
+                                       if(refTracking!=null)
+                                       {
+                                           refTracking.addTracking(instance);
+                                       }
+                                       """ + readBody);
             classModel.putMethodModel(writeMethod);
             classModel.putMethodModel(readMethod);
             CompileHelper compiler                 = new CompileHelper(Thread.currentThread().getContextClassLoader());

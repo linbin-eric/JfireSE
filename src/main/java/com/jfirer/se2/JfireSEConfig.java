@@ -5,13 +5,13 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 @Accessors(chain = true)
 public class JfireSEConfig
 {
     private boolean          refTracking   = false;
-    private boolean          useCompile    = false;
     private short            staticClassId = 0;
     private StaticClasInfo[] clasInfos     = new StaticClasInfo[10];
     private List<Class<?>>   list          = new LinkedList<>();
@@ -19,16 +19,12 @@ public class JfireSEConfig
 
     public JfireSEConfig()
     {
-        staticRegisterClass(ArrayList.class);
+        staticRegisterClass(String.class);
         staticRegisterClass(HashSet.class);
         staticRegisterClass(HashMap.class);
+        staticRegisterClass(ConcurrentHashMap.class);
+        staticRegisterClass(ArrayList.class);
         staticRegisterClass(LinkedList.class);
-    }
-
-    public JfireSEConfig useCompile()
-    {
-        useCompile = true;
-        return this;
     }
 
     public JfireSEConfig refTracking()

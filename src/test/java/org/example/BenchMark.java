@@ -5,6 +5,8 @@ import com.jfirer.fse.Fse;
 import com.jfirer.se2.JfireSE;
 import io.fury.Fury;
 import io.fury.config.Language;
+import org.example.sm.TestDataSm;
+import org.example.sm2.TestDataSm2;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;

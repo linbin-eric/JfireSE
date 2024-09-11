@@ -4,15 +4,14 @@ import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.JfireSEImpl;
 import com.jfirer.se2.classinfo.ClassInfo;
+import com.jfirer.se2.classinfo.RefTracking;
 import com.jfirer.se2.serializer.Serializer;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Modifier;
 
 public class ArraySerializer<T> implements Serializer
 {
     private       Class<?>    componentType;
-    private final boolean     isFinal;
     private final ClassInfo   typeDefinedClassInfo;
     private       JfireSEImpl jfireSE;
 
@@ -21,7 +20,6 @@ public class ArraySerializer<T> implements Serializer
         this.jfireSE         = jfireSE;
         this.componentType   = clazz.getComponentType();
         typeDefinedClassInfo = jfireSE.getOrCreateClassInfo(componentType);
-        isFinal              = Modifier.isFinal(componentType.getModifiers());
     }
 
     @Override
@@ -51,11 +49,17 @@ public class ArraySerializer<T> implements Serializer
         }
     }
 
+
+
     @Override
-    public void read(ByteArray byteArray, Object instance)
+    public Object read(ByteArray byteArray, RefTracking refTracking)
     {
-        int len = byteArray.readPositiveVarInt();
-        T[] arr = (T[]) Array.newInstance(componentType, len);
+        int length = byteArray.readPositiveVarInt();
+        T[] arr    = (T[]) Array.newInstance(componentType, length);
+        if (refTracking != null)
+        {
+            refTracking.addTracking(arr);
+        }
         for (int i = 0; i < arr.length; i++)
         {
             byte flag = byteArray.get();
@@ -69,16 +73,47 @@ public class ArraySerializer<T> implements Serializer
                 {
                     case JfireSE.NAME_ID_CONTENT_TRACK ->
                     {
-                        byte[] bytes = byteArray.readBytesWithSizeEmbedded();
-                        int    i1    = byteArray.readVarInt();
+                        byte[]    classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                        int       classId        = byteArray.readPositiveVarInt();
+                        ClassInfo classInfo      = jfireSE.find(classNameBytes, classId);
+                        arr[i] = (T) classInfo.readWithTrack(byteArray);
                     }
+                    case JfireSE.NAME_ID_CONTENT_UN_TRACK ->
+                    {
+                        byte[]    classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                        int       classId        = byteArray.readPositiveVarInt();
+                        ClassInfo classInfo      = jfireSE.find(classNameBytes, classId);
+                        arr[i] = (T) classInfo.readWithoutTrack(byteArray);
+                    }
+                    case JfireSE.ID_INSTANCE_ID ->
+                    {
+                        int       classId   = byteArray.readPositiveVarInt();
+                        ClassInfo classInfo = jfireSE.find(classId);
+                        arr[i] = (T) classInfo.getInstanceById(byteArray.readPositiveVarInt());
+                    }
+                    case JfireSE.ID_CONTENT_TRACK ->
+                    {
+                        int       classId   = byteArray.readPositiveVarInt();
+                        ClassInfo classInfo = jfireSE.find(classId);
+                        arr[i] = (T) classInfo.readWithTrack(byteArray);
+                    }
+                    case JfireSE.ID_CONTENT_UN_TRACK ->
+                    {
+                        int       classId   = byteArray.readPositiveVarInt();
+                        ClassInfo classInfo = jfireSE.find(classId);
+                        arr[i] = (T) classInfo.readWithoutTrack(byteArray);
+                    }
+                    case JfireSE.INSTANCE_ID ->
+                    {
+                        int instanceId = byteArray.readPositiveVarInt();
+                        arr[i] = (T) typeDefinedClassInfo.getInstanceById(instanceId);
+                    }
+                    case JfireSE.CONTENT_TRACK -> arr[i] = (T) typeDefinedClassInfo.readWithTrack(byteArray);
+                    case JfireSE.CONTENT_UN_TRACK -> arr[i] = (T) typeDefinedClassInfo.readWithoutTrack(byteArray);
+                    default -> throw new RuntimeException("未知的序列化类型");
                 }
             }
         }
-    }
-
-    public static void main(String[] args)
-    {
-        ArraySerializer<Integer> arraySerializer = new ArraySerializer(Integer[].class, (JfireSEImpl) JfireSE.build());
+        return arr;
     }
 }

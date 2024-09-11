@@ -1,8 +1,10 @@
-package org.example;
+package org.example.sm;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class TestDataSm
 {
     private int     a  = 10;

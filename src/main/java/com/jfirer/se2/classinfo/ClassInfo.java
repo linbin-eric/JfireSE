@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Data
-public abstract class ClassInfo
+public abstract class ClassInfo implements RefTracking
 {
     protected final        short      classId;
     protected final        byte[]     classNameBytes;
@@ -29,6 +29,7 @@ public abstract class ClassInfo
         classNameBytes = clazz.getName().getBytes(StandardCharsets.UTF_8);
     }
 
+    @Override
     public int addTracking(Object instance)
     {
         if (tracking == null)
@@ -61,8 +62,20 @@ public abstract class ClassInfo
         }
     }
 
+    /**
+     * 进行完整的对象实例化，并且根据初始配置情况自动决定是否放入追踪。
+     *
+     * @param byteArray
+     * @param instance
+     */
     public abstract void write(ByteArray byteArray, Object instance);
 
+    /**
+     * 进行完整的对象实例化，但是是在已知对象类型的情况。输出的标志位只在 3 个中可选。
+     *
+     * @param byteArray
+     * @param instance
+     */
     public void writeKnownClazz(ByteArray byteArray, Object instance)
     {
         if (refTrack)
@@ -87,40 +100,30 @@ public abstract class ClassInfo
     }
 
     /**
-     * 读取对象的内容，并且这个对象本身要放入追踪
+     * 读取对象的内容，并且这个对象本身要放入追踪。
+     * 这个读取意味着标志位和标志信息已经被读取完毕，此时只是单纯读取对象实例的序列化内容。
      *
      * @param byteArray
      * @return
      */
     public Object readWithTrack(ByteArray byteArray)
     {
-        try
-        {
-            Object instance = UNSAFE.allocateInstance(clazz);
-            addTracking(instance);
-            serializer.read(byteArray, instance);
-            return instance;
-        }
-        catch (InstantiationException e)
-        {
-            throw new RuntimeException(e);
-        }
+        return serializer.read(byteArray, this);
     }
 
+    /**
+     * 读取对象的内容，但是这个对象本身不放入追踪。
+     * 这个读取意味着标志位和标志信息已经被读取完毕，此时只是单纯读取对象实例的序列化内容。
+     *
+     * @param byteArray
+     * @return
+     */
     public Object readWithoutTrack(ByteArray byteArray)
     {
-        try
-        {
-            Object instance = UNSAFE.allocateInstance(clazz);
-            serializer.read(byteArray, instance);
-            return instance;
-        }
-        catch (InstantiationException e)
-        {
-            throw new RuntimeException(e);
-        }
+        return serializer.read(byteArray, null);
     }
 
+    @Override
     public Object getInstanceById(int instanceId)
     {
         return tracking[instanceId];

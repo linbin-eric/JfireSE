@@ -2,22 +2,25 @@ package org.example;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.example.sm.TestDataSm;
+import org.example.sm2.TestDataSm2;
 
 @Data
 @Accessors(chain = true)
 public class TestData
 {
-    private int         a = 213212312;
-    private boolean     b = false;
-    private char        c = 'c';
-    private byte        d = 0x11;
-    private short       e = 24;
-    private long        f = 1213124131312321L;
-    private double      g = 231321.2132;
-    private float       h = (float) 4986.2;
+    private int          a = 213212312;
+    private boolean      b = false;
+    private char         c = 'c';
+    private byte         d = 0x11;
+    private short        e = 24;
+    private long         f = 1213124131312321L;
+    private double       g = 231321.2132;
+    private float        h = (float) 4986.2;
     private String      i = "123452312316789a";
-    private TestDataSm  testDataSm;
-    private TestDataSm2 testDataSm2;
+    private TestDataSm   testDataSm;
+    private TestDataSm2  testDataSm2;
+    private TestDataSm[] sms;
 //    private int[]     j = new int[]{1, 2, 4, 5};
 //    private boolean[] k = new boolean[]{true, false, true, false, false, false, true};
 //    private char[]    l = new char[]{'a', 'v', 'q', 'j', 'h', 'e', 'f'};

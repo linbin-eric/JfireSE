@@ -3,6 +3,8 @@ package org.example;
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 import io.fury.Fury;
+import org.example.sm.TestDataSm;
+import org.example.sm2.TestDataSm2;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,10 +33,15 @@ public class FunctionTest
         testData.setB(true);
         testData.setTestDataSm(sm);
         testData.setTestDataSm2(new TestDataSm2());
+        TestDataSm[] sms = new TestDataSm[2];
+        sms[0] = new TestDataSm().setC("xx");
+        testData.setSms(sms);
         JfireSE jfireSE = JfireSE.build();
         byte[]  bytes   = jfireSE.write(testData);
         Assert.assertEquals(testData, jfireSE.read(bytes));
-        Assert.assertEquals(sm, testData.getTestDataSm());
+        TestData read = (TestData) jfireSE.read(bytes);
+        Assert.assertEquals("xx", read.getSms()[0].getC());
+        Assert.assertNull(read.getSms()[1]);
     }
 
     @Test

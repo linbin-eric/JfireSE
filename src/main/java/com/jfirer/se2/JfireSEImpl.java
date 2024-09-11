@@ -23,7 +23,6 @@ public class JfireSEImpl implements JfireSE
      * 用于存储逆序列化过程中的临时信息
      */
     private       ClassInfo[]              deSerializedClassInfos;
-    private       SerializerFactory        serializerFactory = new SerializerFactory();
     private       ByteArray                byteArray         = new ByteArray(1000);
     private       ClassInfo                classInfoCache;
     private       Map<Class<?>, ClassInfo> classInfoMap      = new HashMap<>();
@@ -61,7 +60,7 @@ public class JfireSEImpl implements JfireSE
         DynamicClassInfo dynamicClassInfo = new DynamicClassInfo((short) dyncmicClassId, clazz, refTracking);
         serializedClassInfos[dyncmicClassId] = dynamicClassInfo;
         dyncmicClassId++;
-        Serializer serializer = serializerFactory.getSerializer(clazz, this);
+        Serializer serializer = SerializerFactory.getSerializer(clazz, this);
         dynamicClassInfo.setSerializer(serializer);
         classInfoCache = dynamicClassInfo;
         return dynamicClassInfo;

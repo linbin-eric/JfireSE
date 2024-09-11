@@ -1,4 +1,4 @@
-package org.example;
+package org.example.sm2;
 
 import lombok.Data;
 
