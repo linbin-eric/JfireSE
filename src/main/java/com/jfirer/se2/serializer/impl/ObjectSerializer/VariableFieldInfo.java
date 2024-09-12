@@ -2,18 +2,17 @@ package com.jfirer.se2.serializer.impl.ObjectSerializer;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
-import com.jfirer.se2.JfireSEImpl;
 import com.jfirer.se2.classinfo.ClassInfo;
 
 import java.lang.reflect.Field;
 
 public class VariableFieldInfo extends FieldInfo
 {
-    private final JfireSEImpl jfireSE;
-    private       ClassInfo   classInfo;
-    private final ClassInfo   firstClassInfo;
+    private final JfireSE   jfireSE;
+    private       ClassInfo classInfo;
+    private final ClassInfo firstClassInfo;
 
-    public VariableFieldInfo(Field field, JfireSEImpl jfireSE)
+    public VariableFieldInfo(Field field, JfireSE jfireSE)
     {
         super(field);
         classInfo    = jfireSE.getOrCreateClassInfo(field.getType());
@@ -77,60 +76,14 @@ public class VariableFieldInfo extends FieldInfo
         {
             switch (flag)
             {
-                case JfireSE.NAME_ID_CONTENT_TRACK ->
-                {
-                    byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
-                    int    classId        = byteArray.readPositiveVarInt();
-                    classInfo = jfireSE.find(classNameBytes, classId);
-                    Object property = classInfo.readWithTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.NAME_ID_CONTENT_UN_TRACK ->
-                {
-                    byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
-                    int    classId   = byteArray.readPositiveVarInt();
-                    classInfo = jfireSE.find(classNameBytes, classId);
-                    Object property = classInfo.readWithoutTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.ID_INSTANCE_ID ->
-                {
-                    int classId    = byteArray.readPositiveVarInt();
-                    int instanceId = byteArray.readPositiveVarInt();
-                    classInfo = jfireSE.find(classId);
-                    Object proeprty = classInfo.getInstanceById(instanceId);
-                    accessor.setObject(instance, proeprty);
-                }
-                case JfireSE.ID_CONTENT_TRACK ->
-                {
-                    int classId = byteArray.readPositiveVarInt();
-                    classInfo = jfireSE.find(classId);
-                    Object property = classInfo.readWithTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.ID_CONTENT_UN_TRACK ->
-                {
-                    int classId = byteArray.readPositiveVarInt();
-                    classInfo = jfireSE.find(classId);
-                    Object property = classInfo.readWithoutTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.INSTANCE_ID ->
-                {
-                    int    instanceId = byteArray.readPositiveVarInt();
-                    Object property   = firstClassInfo.getInstanceById(instanceId);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.CONTENT_TRACK ->
-                {
-                    Object property = firstClassInfo.readWithTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.CONTENT_UN_TRACK ->
-                {
-                    Object property = firstClassInfo.readWithoutTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
+                case JfireSE.NAME_ID_CONTENT_TRACK -> accessor.setObject(instance, jfireSE.readByNameIdContent(byteArray, true));
+                case JfireSE.NAME_ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByNameIdContent(byteArray, false));
+                case JfireSE.ID_INSTANCE_ID -> accessor.setObject(instance, jfireSE.readByIdInstanceId(byteArray));
+                case JfireSE.ID_CONTENT_TRACK -> accessor.setObject(instance, jfireSE.readByIdContent(byteArray, true));
+                case JfireSE.ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByIdContent(byteArray, false));
+                case JfireSE.INSTANCE_ID -> accessor.setObject(instance, firstClassInfo.getInstanceById(byteArray.readPositiveVarInt()));
+                case JfireSE.CONTENT_TRACK -> accessor.setObject(instance, firstClassInfo.readWithTrack(byteArray));
+                case JfireSE.CONTENT_UN_TRACK -> accessor.setObject(instance, firstClassInfo.readWithoutTrack(byteArray));
                 default -> throw new RuntimeException("flag:" + flag);
             }
         }

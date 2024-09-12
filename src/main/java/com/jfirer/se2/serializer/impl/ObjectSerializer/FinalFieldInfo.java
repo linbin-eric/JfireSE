@@ -2,7 +2,6 @@ package com.jfirer.se2.serializer.impl.ObjectSerializer;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
-import com.jfirer.se2.JfireSEImpl;
 import com.jfirer.se2.classinfo.ClassInfo;
 
 import java.lang.reflect.Field;
@@ -10,9 +9,9 @@ import java.lang.reflect.Field;
 public class FinalFieldInfo extends FieldInfo
 {
     private ClassInfo   classInfo;
-    private JfireSEImpl jfireSE;
+    private JfireSE jfireSE;
 
-    public FinalFieldInfo(Field field, JfireSEImpl jfireSE)
+    public FinalFieldInfo(Field field, JfireSE jfireSE)
     {
         super(field);
         classInfo    = jfireSE.getOrCreateClassInfo(field.getType());
@@ -45,22 +44,9 @@ public class FinalFieldInfo extends FieldInfo
         {
             switch (flag)
             {
-                case JfireSE.INSTANCE_ID ->
-                {
-                    int    instanceId = byteArray.readPositiveVarInt();
-                    Object property   = classInfo.getInstanceById(instanceId);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.CONTENT_TRACK ->
-                {
-                    Object property = classInfo.readWithTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
-                case JfireSE.CONTENT_UN_TRACK ->
-                {
-                    Object property = classInfo.readWithoutTrack(byteArray);
-                    accessor.setObject(instance, property);
-                }
+                case JfireSE.INSTANCE_ID -> accessor.setObject(instance, classInfo.getInstanceById(byteArray.readPositiveVarInt()));
+                case JfireSE.CONTENT_TRACK -> accessor.setObject(instance, classInfo.readWithTrack(byteArray));
+                case JfireSE.CONTENT_UN_TRACK -> accessor.setObject(instance, classInfo.readWithoutTrack(byteArray));
                 default -> throw new RuntimeException("flag:" + flag);
             }
         }

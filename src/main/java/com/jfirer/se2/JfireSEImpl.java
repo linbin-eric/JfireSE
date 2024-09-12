@@ -26,6 +26,7 @@ public class JfireSEImpl implements JfireSE
     private       ByteArray                byteArray         = new ByteArray(1000);
     private       ClassInfo                classInfoCache;
     private       Map<Class<?>, ClassInfo> classInfoMap      = new HashMap<>();
+    private       SerializerFactory        serializerFactory = new SerializerFactory(this);
     private       Map<byte[], ClassInfo>   classInfoCacheMap = new HashMap<>();
 
     public JfireSEImpl(boolean refTracking, StaticClasInfo[] staticClasInfos)
@@ -39,6 +40,7 @@ public class JfireSEImpl implements JfireSE
         dyncmicClassId = staticClassId + 1;
     }
 
+    @Override
     public ClassInfo getOrCreateClassInfo(Class<?> clazz)
     {
         if (classInfoCache != null && classInfoCache.getClazz() == clazz)
@@ -60,7 +62,7 @@ public class JfireSEImpl implements JfireSE
         DynamicClassInfo dynamicClassInfo = new DynamicClassInfo((short) dyncmicClassId, clazz, refTracking);
         serializedClassInfos[dyncmicClassId] = dynamicClassInfo;
         dyncmicClassId++;
-        Serializer serializer = SerializerFactory.getSerializer(clazz, this);
+        Serializer serializer = serializerFactory.getSerializer(clazz);
         dynamicClassInfo.setSerializer(serializer);
         classInfoCache = dynamicClassInfo;
         return dynamicClassInfo;
@@ -75,7 +77,7 @@ public class JfireSEImpl implements JfireSE
     }
 
     @Override
-    public byte[] write(Object instance)
+    public byte[] serialize(Object instance)
     {
         if (instance == null)
         {
@@ -93,7 +95,7 @@ public class JfireSEImpl implements JfireSE
     }
 
     @Override
-    public Object read(byte[] bytes)
+    public Object deSerialize(byte[] bytes)
     {
         ByteArray stream = new ByteArray(bytes);
         byte      b      = stream.get();
@@ -132,6 +134,7 @@ public class JfireSEImpl implements JfireSE
         }
     }
 
+    @Override
     public ClassInfo find(byte[] classNameBytes, int classId)
     {
         try
@@ -164,8 +167,32 @@ public class JfireSEImpl implements JfireSE
         }
     }
 
+    @Override
     public ClassInfo find(int classId)
     {
         return deSerializedClassInfos[classId];
+    }
+
+    @Override
+    public Object readByNameIdContent(ByteArray byteArray, boolean refTracking)
+    {
+        byte[]    classNameBytes = byteArray.readBytesWithSizeEmbedded();
+        int       classId        = byteArray.readPositiveVarInt();
+        ClassInfo classInfo      = find(classNameBytes, classId);
+        return refTracking ? classInfo.readWithTrack(byteArray) : classInfo.readWithoutTrack(byteArray);
+    }
+
+    @Override
+    public Object readByIdInstanceId(ByteArray byteArray)
+    {
+        int classId = byteArray.readPositiveVarInt();
+        return find(classId).getInstanceById(byteArray.readPositiveVarInt());
+    }
+
+    @Override
+    public Object readByIdContent(ByteArray byteArray, boolean refTracking)
+    {
+        ClassInfo classInfo = find(byteArray.readPositiveVarInt());
+        return refTracking ? classInfo.readWithTrack(byteArray) : classInfo.readWithoutTrack(byteArray);
     }
 }

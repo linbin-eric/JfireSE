@@ -1,5 +1,7 @@
 package com.jfirer.se2;
 
+import com.jfirer.se2.classinfo.ClassInfo;
+
 public interface JfireSE
 {
     byte NULL                     = 0;
@@ -28,7 +30,19 @@ public interface JfireSE
         return new JfireSEConfig().build();
     }
 
-    byte[] write(Object instance);
+    byte[] serialize(Object instance);
 
-    Object read(byte[] bytes);
+    Object deSerialize(byte[] bytes);
+
+    ClassInfo getOrCreateClassInfo(Class<?> clazz);
+
+    ClassInfo find(byte[] classNameBytes, int classId);
+
+    ClassInfo find(int classId);
+
+    Object readByNameIdContent(ByteArray byteArray, boolean refTracking);
+
+    Object readByIdInstanceId(ByteArray byteArray);
+
+    Object readByIdContent(ByteArray byteArray, boolean refTracking);
 }

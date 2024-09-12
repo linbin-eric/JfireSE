@@ -37,9 +37,9 @@ public class FunctionTest
         sms[0] = new TestDataSm().setC("xx");
         testData.setSms(sms);
         JfireSE jfireSE = JfireSE.build();
-        byte[]  bytes   = jfireSE.write(testData);
-        Assert.assertEquals(testData, jfireSE.read(bytes));
-        TestData read = (TestData) jfireSE.read(bytes);
+        byte[]  bytes   = jfireSE.serialize(testData);
+        Assert.assertEquals(testData, jfireSE.deSerialize(bytes));
+        TestData read = (TestData) jfireSE.deSerialize(bytes);
         Assert.assertEquals("xx", read.getSms()[0].getC());
         Assert.assertNull(read.getSms()[1]);
     }

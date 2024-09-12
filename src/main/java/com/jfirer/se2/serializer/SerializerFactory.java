@@ -1,5 +1,6 @@
 package com.jfirer.se2.serializer;
 
+import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.JfireSEImpl;
 import com.jfirer.se2.serializer.impl.ArraySerializer;
 import com.jfirer.se2.serializer.impl.BoxedArraySerializer;
@@ -11,10 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SerializerFactory
 {
-    private static Map<Class<?>, Serializer> store = new ConcurrentHashMap<>();
+    private Map<Class<?>, Serializer> store = new ConcurrentHashMap<>();
+    private JfireSE                   jfireSE;
 
-    static
+    public SerializerFactory(JfireSE jfireSE)
     {
+        this.jfireSE = jfireSE;
         store.put(int[].class, new PrimitiveArraySerializer.IntArraySerializer());
         store.put(long[].class, new PrimitiveArraySerializer.LongArraySerializer());
         store.put(byte[].class, new PrimitiveArraySerializer.ByteArraySerializer());
@@ -34,7 +37,7 @@ public class SerializerFactory
         store.put(String[].class, new BoxedArraySerializer.StringArraySerializer());
     }
 
-    public static Serializer getSerializer(Class<?> clazz, JfireSEImpl jfireSE)
+    public Serializer getSerializer(Class<?> clazz)
     {
         if (clazz.isArray())
         {

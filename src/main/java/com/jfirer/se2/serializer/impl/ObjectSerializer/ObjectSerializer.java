@@ -65,7 +65,7 @@ public class ObjectSerializer implements Serializer
         }
     }
 
-    public static List<FieldInfo> parse(Class<?> clazz, JfireSEImpl jfireSE)
+    public static List<FieldInfo> parse(Class<?> clazz, JfireSE jfireSE)
     {
         Class       type   = clazz;
         List<Field> fields = new ArrayList<>();
@@ -106,7 +106,7 @@ public class ObjectSerializer implements Serializer
         return list;
     }
 
-    public static Serializer buildCompileVersion(Class<?> clazz, JfireSEImpl jfireSE)
+    public static Serializer buildCompileVersion(Class<?> clazz, JfireSE jfireSE)
     {
         List<FieldInfo> parse      = parse(clazz, jfireSE);
         ClassModel      classModel = new ClassModel("ObjectSerializer_compile_" + COMPILE_COUNT);
@@ -129,10 +129,10 @@ public class ObjectSerializer implements Serializer
         classModel.addImport(FieldInfo.class);
         classModel.addImport(ByteArray.class);
         classModel.addField(new FieldModel("UNSAFE", Unsafe.class, "Unsafe.getUnsafe()", classModel));
-        classModel.addField(new FieldModel("jfireSE", JfireSEImpl.class, classModel));
+        classModel.addField(new FieldModel("jfireSE", JfireSE.class, classModel));
         classModel.addField(new FieldModel("clazz", Class.class, classModel));
         ConstructorModel constructorModel = new ConstructorModel(classModel);
-        constructorModel.setParamTypes(Class.class, JfireSEImpl.class, List.class);
+        constructorModel.setParamTypes(Class.class, JfireSE.class, List.class);
         constructorModel.setParamNames("clazz", "jfireSE", "list");
         StringBuilder constructorBody = new StringBuilder();
         constructorBody.append("""
@@ -471,76 +471,15 @@ public class ObjectSerializer implements Serializer
                     readBody.append("else{\r\n");
                     readBody.append("switch(" + flagName + "){\r\n");
                     readBody.append("""
-                                            case JfireSE.NAME_ID_CONTENT_TRACK->
-                                            {
-                                               byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
-                                               int    classId        = byteArray.readPositiveVarInt();
-                                               ClassInfo classInfo = jfireSE.find(classNameBytes, classId);
-                                               Object property = classInfo.readWithTrack(byteArray);
-                                               UNSAFE.putReference(instance,offset, property);
-                                            }
-                                            """.replace("offset", String.valueOf(l)));
-                    readBody.append("""
-                                            case JfireSE.NAME_ID_CONTENT_UN_TRACK->
-                                            {
-                                                   byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded(); 
-                                                   int classId = byteArray.readPositiveVarInt();
-                                                   ClassInfo classInfo = jfireSE.find(classNameBytes,classId);
-                                                   Object property = classInfo.readWithoutTrack(byteArray);
-                                                   UNSAFE.putReference(instance,offset, property);
-                                            }
-                                            """.replace("offset", String.valueOf(l)));
-                    readBody.append("""
-                                            case JfireSE.ID_INSTANCE_ID->
-                                            {
-                                                int classId = byteArray.readPositiveVarInt();
-                                                int instanceId = byteArray.readPositiveVarInt();
-                                                ClassInfo classInfo = jfireSE.find(classId);
-                                                Object property = classInfo.getInstanceById(instanceId);
-                                                UNSAFE.putReference(instance,offset, property);
-                                             }
-                                            """.replace("offset", String.valueOf(l)));
-                    readBody.append("""
-                                            case JfireSE.ID_CONTENT_TRACK->
-                                            {
-                                               int classId = byteArray.readPositiveVarInt();
-                                               ClassInfo classInfo = jfireSE.find(classId);
-                                               Object property = classInfo.readWithTrack(byteArray);
-                                               UNSAFE.putReference(instance,offset, property);
-                                            }
-                                            """.replace("offset", String.valueOf(l)));
-                    readBody.append("""
-                                            case JfireSE.ID_CONTENT_UN_TRACK->
-                                            {
-                                               int classId = byteArray.readPositiveVarInt();
-                                               ClassInfo classInfo = jfireSE.find(classId);
-                                               Object property = classInfo.readWithoutTrack(byteArray);
-                                               UNSAFE.putReference(instance,offset, property);
-                                            }
-                                            """.replace("offset", String.valueOf(l)));
-                    readBody.append("""
-                                            case JfireSE.INSTANCE_ID ->
-                                            {
-                                               int instanceId = byteArray.readPositiveVarInt();
-                                               Object property   = firstClassInfo.getInstanceById(instanceId);
-                                               UNSAFE.putReference(instance,offset, property);
-                                            }    
-                                            """.replace("offset", String.valueOf(l))//
-                                               .replace("firstClassInfo", firstClassInfoProperty));
-                    readBody.append("""
-                                            case JfireSE.CONTENT_TRACK ->
-                                            {
-                                               Object property = firstClassInfo.readWithTrack(byteArray);
-                                               UNSAFE.putReference(instance,offset, property);
-                                            }
-                                            """.replace("offset", String.valueOf(l)).replace("firstClassInfo", firstClassInfoProperty));
-                    readBody.append("""
-                                            case JfireSE.CONTENT_UN_TRACK ->
-                                            {
-                                               Object property = firstClassInfo.readWithoutTrack(byteArray);
-                                               UNSAFE.putReference(instance,offset, property);
-                                            }
-                                            """.replace("offset", String.valueOf(l)).replace("firstClassInfo", firstClassInfoProperty));
+                                            case JfireSE.NAME_ID_CONTENT_TRACK-> UNSAFE.putReference(instance,offset, jfireSE.readByNameIdContent(byteArray, true));
+                                            case JfireSE.NAME_ID_CONTENT_UN_TRACK->UNSAFE.putReference(instance,offset, jfireSE.readByNameIdContent(byteArray, false));
+                                            case JfireSE.ID_INSTANCE_ID->UNSAFE.putReference(instance,offset, jfireSE.readByIdInstanceId(byteArray));
+                                            case JfireSE.ID_CONTENT_TRACK->UNSAFE.putReference(instance,offset, jfireSE.readByIdContent(byteArray, true));
+                                            case JfireSE.ID_CONTENT_UN_TRACK-> UNSAFE.putReference(instance,offset,  jfireSE.readByIdContent(byteArray, false));
+                                            case JfireSE.INSTANCE_ID -> UNSAFE.putReference(instance,offset, firstClassInfo.getInstanceById(byteArray.readPositiveVarInt()));
+                                            case JfireSE.CONTENT_TRACK -> UNSAFE.putReference(instance,offset, firstClassInfo.readWithTrack(byteArray));
+                                            case JfireSE.CONTENT_UN_TRACK -> UNSAFE.putReference(instance,offset, firstClassInfo.readWithoutTrack(byteArray));
+                                            """.replace("offset", String.valueOf(l)) .replace("firstClassInfo", firstClassInfoProperty));
                     readBody.append("default -> throw new RuntimeException(\"flag:\" + " + flagName + ");\r\n");
                     readBody.append("}\r\n");
                     readBody.append("}\r\n");
@@ -575,22 +514,9 @@ public class ObjectSerializer implements Serializer
                                                 {
                                                         switch (flag)
                                                         {
-                                                            case JfireSE.INSTANCE_ID ->
-                                                            {
-                                                                int    instanceId = byteArray.readPositiveVarInt();
-                                                                Object property   = classInfo.getInstanceById(instanceId);
-                                                                UNSAFE.putReference(instance,offset,property);
-                                                            }
-                                                            case JfireSE.CONTENT_TRACK ->
-                                                            {
-                                                                Object property = classInfo.readWithTrack(byteArray);
-                                                                UNSAFE.putReference(instance,offset,property);
-                                                            }
-                                                            case JfireSE.CONTENT_UN_TRACK ->
-                                                            {
-                                                                Object property = classInfo.readWithoutTrack(byteArray);
-                                                                UNSAFE.putReference(instance,offset,property);
-                                                            }
+                                                            case JfireSE.INSTANCE_ID -> UNSAFE.putReference(instance,offset,classInfo.getInstanceById(byteArray.readPositiveVarInt()));
+                                                            case JfireSE.CONTENT_TRACK -> UNSAFE.putReference(instance,offset,classInfo.readWithTrack(byteArray));
+                                                            case JfireSE.CONTENT_UN_TRACK -> UNSAFE.putReference(instance,offset,classInfo.readWithoutTrack(byteArray));
                                                             default -> throw new RuntimeException("flag:" + flag);
                                                         }       
                                                 }
@@ -620,7 +546,7 @@ public class ObjectSerializer implements Serializer
             classModel.putMethodModel(readMethod);
             CompileHelper compiler                 = new CompileHelper(Thread.currentThread().getContextClassLoader());
             Class<?>      compile                  = compiler.compile(classModel);
-            Serializer    compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSEImpl.class, List.class).newInstance(clazz, jfireSE, parse);
+            Serializer    compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSE.class, List.class).newInstance(clazz, jfireSE, parse);
             return compiledObjectSerializer;
         }
         catch (NoSuchMethodException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e)

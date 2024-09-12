@@ -55,7 +55,7 @@ public class BenchMark
     @Benchmark
     public void testJfireSE()
     {
-        jfireSE.write(data);
+        jfireSE.serialize(data);
     }
 
     public static void main(String[] args) throws RunnerException
