@@ -174,6 +174,42 @@ public class JfireSEImpl implements JfireSE
     }
 
     @Override
+    public Object readByUnderInstanceIdFlag(ByteArray byteArray, byte flag)
+    {
+        switch (flag)
+        {
+            case JfireSE.NAME_ID_CONTENT_TRACK ->
+            {
+                byte[]    classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                int       classId        = byteArray.readPositiveVarInt();
+                ClassInfo classInfo      = find(classNameBytes, classId);
+                return refTracking ? classInfo.readWithTrack(byteArray) : classInfo.readWithoutTrack(byteArray);
+            }
+            case JfireSE.NAME_ID_CONTENT_UN_TRACK ->
+            {
+                byte[] classNameBytes = byteArray.readBytesWithSizeEmbedded();
+                int    classId        = byteArray.readPositiveVarInt();
+                return find(classNameBytes, classId).readWithoutTrack(byteArray);
+            }
+            case JfireSE.ID_INSTANCE_ID ->
+            {
+                return find(byteArray.readPositiveVarInt()).getInstanceById(byteArray.readPositiveVarInt());
+            }
+            case JfireSE.ID_CONTENT_TRACK ->
+            {
+                int classId = byteArray.readPositiveVarInt();
+                return find(classId).readWithTrack(byteArray);
+            }
+            case JfireSE.ID_CONTENT_UN_TRACK ->
+            {
+                int classId = byteArray.readPositiveVarInt();
+                return find(classId).readWithoutTrack(byteArray);
+            }
+            default -> throw new RuntimeException("未知的序列化类型");
+        }
+    }
+
+    @Override
     public Object readByNameIdContent(ByteArray byteArray, boolean refTracking)
     {
         byte[]    classNameBytes = byteArray.readBytesWithSizeEmbedded();

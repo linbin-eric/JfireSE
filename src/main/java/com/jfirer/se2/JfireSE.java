@@ -40,6 +40,8 @@ public interface JfireSE
 
     ClassInfo find(int classId);
 
+    Object readByUnderInstanceIdFlag(ByteArray byteArray, byte flag);
+
     Object readByNameIdContent(ByteArray byteArray, boolean refTracking);
 
     Object readByIdInstanceId(ByteArray byteArray);

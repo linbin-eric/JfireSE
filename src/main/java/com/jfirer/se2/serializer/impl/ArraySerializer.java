@@ -8,6 +8,8 @@ import com.jfirer.se2.serializer.Serializer;
 
 import java.lang.reflect.Array;
 
+import static com.jfirer.se2.JfireSE.*;
+
 public class ArraySerializer<T> implements Serializer
 {
     private       Class<?>  componentType;
@@ -68,11 +70,8 @@ public class ArraySerializer<T> implements Serializer
             {
                 switch (flag)
                 {
-                    case JfireSE.NAME_ID_CONTENT_TRACK -> arr[i] = (T) jfireSE.readByNameIdContent(byteArray, true);
-                    case JfireSE.NAME_ID_CONTENT_UN_TRACK -> arr[i] = (T) jfireSE.readByNameIdContent(byteArray, false);
-                    case JfireSE.ID_INSTANCE_ID -> arr[i] = (T) jfireSE.readByIdInstanceId(byteArray);
-                    case JfireSE.ID_CONTENT_TRACK -> arr[i] = (T) jfireSE.readByIdContent(byteArray, true);
-                    case JfireSE.ID_CONTENT_UN_TRACK -> arr[i] = (T) jfireSE.readByIdContent(byteArray, false);
+                    case NAME_ID_CONTENT_TRACK, NAME_ID_CONTENT_UN_TRACK, ID_INSTANCE_ID, ID_CONTENT_TRACK,
+                         ID_CONTENT_UN_TRACK -> arr[i] = (T) jfireSE.readByUnderInstanceIdFlag(byteArray, flag);
                     case JfireSE.INSTANCE_ID -> arr[i] = (T) typeDefinedClassInfo.getInstanceById(byteArray.readPositiveVarInt());
                     case JfireSE.CONTENT_TRACK -> arr[i] = (T) typeDefinedClassInfo.readWithTrack(byteArray);
                     case JfireSE.CONTENT_UN_TRACK -> arr[i] = (T) typeDefinedClassInfo.readWithoutTrack(byteArray);

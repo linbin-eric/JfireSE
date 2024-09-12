@@ -471,15 +471,11 @@ public class ObjectSerializer implements Serializer
                     readBody.append("else{\r\n");
                     readBody.append("switch(" + flagName + "){\r\n");
                     readBody.append("""
-                                            case JfireSE.NAME_ID_CONTENT_TRACK-> UNSAFE.putReference(instance,offset, jfireSE.readByNameIdContent(byteArray, true));
-                                            case JfireSE.NAME_ID_CONTENT_UN_TRACK->UNSAFE.putReference(instance,offset, jfireSE.readByNameIdContent(byteArray, false));
-                                            case JfireSE.ID_INSTANCE_ID->UNSAFE.putReference(instance,offset, jfireSE.readByIdInstanceId(byteArray));
-                                            case JfireSE.ID_CONTENT_TRACK->UNSAFE.putReference(instance,offset, jfireSE.readByIdContent(byteArray, true));
-                                            case JfireSE.ID_CONTENT_UN_TRACK-> UNSAFE.putReference(instance,offset,  jfireSE.readByIdContent(byteArray, false));
+                                            case JfireSE.NAME_ID_CONTENT_TRACK,JfireSE.NAME_ID_CONTENT_UN_TRACK,JfireSE.ID_INSTANCE_ID,JfireSE.ID_CONTENT_TRACK,JfireSE.ID_CONTENT_UN_TRACK-> UNSAFE.putReference(instance,offset, jfireSE.readByUnderInstanceIdFlag(byteArray, flag));
                                             case JfireSE.INSTANCE_ID -> UNSAFE.putReference(instance,offset, firstClassInfo.getInstanceById(byteArray.readPositiveVarInt()));
                                             case JfireSE.CONTENT_TRACK -> UNSAFE.putReference(instance,offset, firstClassInfo.readWithTrack(byteArray));
                                             case JfireSE.CONTENT_UN_TRACK -> UNSAFE.putReference(instance,offset, firstClassInfo.readWithoutTrack(byteArray));
-                                            """.replace("offset", String.valueOf(l)) .replace("firstClassInfo", firstClassInfoProperty));
+                                            """.replace("offset", String.valueOf(l)).replace("firstClassInfo", firstClassInfoProperty).replace("flag", flagName));
                     readBody.append("default -> throw new RuntimeException(\"flag:\" + " + flagName + ");\r\n");
                     readBody.append("}\r\n");
                     readBody.append("}\r\n");

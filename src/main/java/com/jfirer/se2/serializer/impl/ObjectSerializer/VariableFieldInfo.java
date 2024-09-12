@@ -76,11 +76,7 @@ public class VariableFieldInfo extends FieldInfo
         {
             switch (flag)
             {
-                case JfireSE.NAME_ID_CONTENT_TRACK -> accessor.setObject(instance, jfireSE.readByNameIdContent(byteArray, true));
-                case JfireSE.NAME_ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByNameIdContent(byteArray, false));
-                case JfireSE.ID_INSTANCE_ID -> accessor.setObject(instance, jfireSE.readByIdInstanceId(byteArray));
-                case JfireSE.ID_CONTENT_TRACK -> accessor.setObject(instance, jfireSE.readByIdContent(byteArray, true));
-                case JfireSE.ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByIdContent(byteArray, false));
+                case JfireSE.NAME_ID_CONTENT_TRACK,JfireSE.NAME_ID_CONTENT_UN_TRACK, JfireSE.ID_INSTANCE_ID,JfireSE.ID_CONTENT_TRACK,JfireSE.ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByUnderInstanceIdFlag(byteArray, flag));
                 case JfireSE.INSTANCE_ID -> accessor.setObject(instance, firstClassInfo.getInstanceById(byteArray.readPositiveVarInt()));
                 case JfireSE.CONTENT_TRACK -> accessor.setObject(instance, firstClassInfo.readWithTrack(byteArray));
                 case JfireSE.CONTENT_UN_TRACK -> accessor.setObject(instance, firstClassInfo.readWithoutTrack(byteArray));

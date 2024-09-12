@@ -1,9 +1,9 @@
 package com.jfirer.se2.serializer;
 
 import com.jfirer.se2.JfireSE;
-import com.jfirer.se2.JfireSEImpl;
 import com.jfirer.se2.serializer.impl.ArraySerializer;
 import com.jfirer.se2.serializer.impl.BoxedArraySerializer;
+import com.jfirer.se2.serializer.impl.BoxedTypeSerializer;
 import com.jfirer.se2.serializer.impl.ObjectSerializer.ObjectSerializer;
 import com.jfirer.se2.serializer.impl.PrimitiveArraySerializer;
 
@@ -35,6 +35,7 @@ public class SerializerFactory
         store.put(Double[].class, new BoxedArraySerializer.DoubleArraySerializer());
         store.put(Float[].class, new BoxedArraySerializer.FloatArraySerializer());
         store.put(String[].class, new BoxedArraySerializer.StringArraySerializer());
+        store.put(String.class, new BoxedTypeSerializer.StringSerializer());
     }
 
     public Serializer getSerializer(Class<?> clazz)
