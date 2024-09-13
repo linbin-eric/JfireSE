@@ -76,12 +76,12 @@ public class ObjectSerializer implements Serializer
 
     public static List<FieldInfo> parse(Class<?> clazz, JfireSE jfireSE)
     {
-        Class type = clazz;
+        Class       type   = clazz;
         List<Field> fields = new ArrayList<>();
         while (type != Object.class)
         {
-            fields.addAll(Arrays.stream(type.getDeclaredFields()).filter(Predicate.not(field -> Modifier.isStatic(field.getModifiers())))//
-                                .filter(field -> !Modifier.isTransient(field.getModifiers()))//
+            fields.addAll(Arrays.stream(type.getDeclaredFields()).filter(Predicate.not(field -> Modifier.isStatic(field.getModifiers()))) //
+                                .filter(field -> !Modifier.isTransient(field.getModifiers())) //
                                 .toList());
             type = type.getSuperclass();
         }
@@ -167,8 +167,8 @@ public class ObjectSerializer implements Serializer
         {
             MethodModel writeMethod = new MethodModel(Serializer.class.getDeclaredMethod("writeBytes", ByteArray.class, Object.class), classModel);
             writeMethod.setParamterNames("byteArray", "instance");
-            StringBuilder writeBody  = new StringBuilder();
-            MethodModel   readMethod = new MethodModel(Serializer.class.getDeclaredMethod("read", ByteArray.class, RefTracking.class), classModel);
+            StringBuilder writeBody = new StringBuilder();
+            MethodModel readMethod = new MethodModel(Serializer.class.getDeclaredMethod("read", ByteArray.class, RefTracking.class), classModel);
             readMethod.setParamterNames("byteArray", "refTracking");
             StringBuilder readBody   = new StringBuilder();
             int           fieldIndex = 0;
@@ -240,7 +240,7 @@ public class ObjectSerializer implements Serializer
                                                            byteArray.put(JfireSE.NOT_NULL);
                                                            byteArray.put(obj);
                                                        }
-                                                     }  
+                                                     }
                                                      """.replace("offset", String.valueOf(l)));
                             readBody.append("""
                                                     {
@@ -265,7 +265,7 @@ public class ObjectSerializer implements Serializer
                                                            byteArray.put(JfireSE.NOT_NULL);
                                                            byteArray.writeVarInt(obj);
                                                        }
-                                                     }  
+                                                     }
                                                      """.replace("offset", String.valueOf(l)));
                             readBody.append("""
                                                     {
@@ -290,7 +290,7 @@ public class ObjectSerializer implements Serializer
                                                            byteArray.put(JfireSE.NOT_NULL);
                                                            byteArray.writeVarInt(obj);
                                                        }
-                                                     }  
+                                                     }
                                                      """.replace("offset", String.valueOf(l)));
                             readBody.append("""
                                                     {
@@ -315,7 +315,7 @@ public class ObjectSerializer implements Serializer
                                                            byteArray.put(JfireSE.NOT_NULL);
                                                            byteArray.writeVarLong(obj);
                                                        }
-                                                     }  
+                                                     }
                                                      """.replace("offset", String.valueOf(l)));
                             readBody.append("""
                                                     {
@@ -340,7 +340,7 @@ public class ObjectSerializer implements Serializer
                                                            byteArray.put(JfireSE.NOT_NULL);
                                                            byteArray.writeFloat(obj);
                                                        }
-                                                     }  
+                                                     }
                                                      """.replace("offset", String.valueOf(l)));
                             readBody.append("""
                                                     {
@@ -365,7 +365,7 @@ public class ObjectSerializer implements Serializer
                                                            byteArray.put(JfireSE.NOT_NULL);
                                                            byteArray.writeDouble(obj);
                                                        }
-                                                     }  
+                                                     }
                                                      """.replace("offset", String.valueOf(l)));
                             readBody.append("""
                                                     {
@@ -456,10 +456,10 @@ public class ObjectSerializer implements Serializer
                 }
                 else if (fieldInfo instanceof VariableFieldInfo)
                 {
-                    String     classInfoProperty      = "classInfo_$_" + fieldIndex;
-                    String     firstClassInfoProperty = "firstClassInfo_$_" + fieldIndex;
-                    FieldModel classInfoModel         = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
-                    FieldModel firstClassInfoModel    = new FieldModel(firstClassInfoProperty, ClassInfo.class, classModel);
+                    String classInfoProperty      = "classInfo_$_" + fieldIndex;
+                    String firstClassInfoProperty = "firstClassInfo_$_" + fieldIndex;
+                    FieldModel classInfoModel = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
+                    FieldModel firstClassInfoModel = new FieldModel(firstClassInfoProperty, ClassInfo.class, classModel);
                     classModel.addField(classInfoModel, firstClassInfoModel);
                     initBody.append(classInfoProperty).append("=jfireSE.getOrCreateClassInfo(((FieldInfo)list_serializer_compile.get(").append(fieldIndex).append(")).getField().getType());\r\n");
                     initBody.append(" if( ((FieldInfo)list_serializer_compile.get(").append(fieldIndex).append(")).getField().getType().isInterface()) {");
@@ -472,7 +472,7 @@ public class ObjectSerializer implements Serializer
                     writeBody.append("else{\r\n");
                     String objClassName = "objClass_$_" + fieldIndex;
                     writeBody.append("Class ").append(objClassName).append(" = ").append(objName).append(".getClass();\r\n");
-                    writeBody.append("classInfo = classInfo.getClazz() == objClass ? classInfo : jfireSE.getOrCreateClassInfo(objClass);".replace("objClass", objClassName)//
+                    writeBody.append("classInfo = classInfo.getClazz() == objClass ? classInfo : jfireSE.getOrCreateClassInfo(objClass);".replace("objClass", objClassName) //
                                                                                                                                          .replace("classInfo", classInfoProperty));
                     writeBody.append("if(").append(classInfoProperty).append("==").append(firstClassInfoProperty).append("){\r\n");
                     writeBody.append(classInfoProperty).append(".writeKnownClazz(byteArray,").append(objName).append(");\r\n");
@@ -498,8 +498,8 @@ public class ObjectSerializer implements Serializer
                 }
                 else if (fieldInfo instanceof FinalFieldInfo)
                 {
-                    String     classInfoProperty = "classInfo_$_" + fieldIndex;
-                    FieldModel classInfoModel    = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
+                    String classInfoProperty = "classInfo_$_" + fieldIndex;
+                    FieldModel classInfoModel = new FieldModel(classInfoProperty, ClassInfo.class, classModel);
                     classModel.addField(classInfoModel);
                     initBody.append(classInfoProperty + "=jfireSE.getOrCreateClassInfo(((FieldInfo)list_serializer_compile.get(" + fieldIndex + ")).getField().getType());\r\n");
                     writeBody.append("""
@@ -569,7 +569,7 @@ public class ObjectSerializer implements Serializer
             writeMethod.setBody(writeBody.toString());
             readBody.append("return instance;\r\n");
             readMethod.setBody("""
-                                       Object instance; 
+                                       Object instance;
                                        try{
                                           instance = UNSAFE.allocateInstance(clazz);
                                         }catch (InstantiationException e)
@@ -586,9 +586,9 @@ public class ObjectSerializer implements Serializer
             MethodModel initModel = new MethodModel(Serializer.class.getDeclaredMethod("init"), classModel);
             initModel.setBody(initBody.toString());
             classModel.putMethodModel(initModel);
-            CompileHelper compiler                 = new CompileHelper(Thread.currentThread().getContextClassLoader());
-            Class<?>      compile                  = compiler.compile(classModel);
-            Serializer    compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSE.class, List.class).newInstance(clazz, jfireSE, parse);
+            CompileHelper compiler = new CompileHelper(Thread.currentThread().getContextClassLoader());
+            Class<?>      compile  = compiler.compile(classModel);
+            Serializer compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSE.class, List.class).newInstance(clazz, jfireSE, parse);
             return compiledObjectSerializer;
         }
         catch (NoSuchMethodException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e)
