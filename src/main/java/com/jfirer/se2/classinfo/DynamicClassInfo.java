@@ -14,35 +14,30 @@ public class DynamicClassInfo extends ClassInfo
     /**
      * 首次输出的情况下需要输出类名
      */
-    private boolean firstSerialized = true;
-
     public DynamicClassInfo(short classId, Class<?> clazz, boolean refTracking)
     {
         super(classId, clazz, refTracking);
     }
 
     @Override
-    public void reset()
-    {
-        super.reset();
-        firstSerialized = true;
-    }
-
-    @Override
     public void write(ByteArray byteArray, Object instance)
     {
-        if (refTrack)
+        if (firstSerialized)
         {
-            if (firstSerialized)
+            if (refTrack)
             {
-                firstSerialized = false;
                 addTracking(instance);
-                byteArray.put(JfireSE.NAME_ID_CONTENT_TRACK);
-                byteArray.writeBytesWithSizeEmbedded(classNameBytes);
-                byteArray.writePositiveVarInt(classId);
-                serializer.writeBytes(byteArray, instance);
             }
-            else
+            firstSerialized = false;
+            byteArray.put(JfireSE.NAME_ID_CONTENT_TRACK);
+            byteArray.writeString(classNameStringBytes, classNameStringCoder);
+            byteArray.writePositiveVarInt(classId);
+            serializer.writeBytes(byteArray, instance);
+            jfireSE.addCleanClassInfo(this);
+        }
+        else
+        {
+            if (refTrack)
             {
                 int i = addTracking(instance);
                 if (i == -1)
@@ -57,17 +52,6 @@ public class DynamicClassInfo extends ClassInfo
                     byteArray.writePositiveVarInt(classId);
                     byteArray.writePositiveVarInt(i);
                 }
-            }
-        }
-        else
-        {
-            if (firstSerialized)
-            {
-                firstSerialized = false;
-                byteArray.put(JfireSE.NAME_ID_CONTENT_UN_TRACK);
-                byteArray.writeBytesWithSizeEmbedded(classNameBytes);
-                byteArray.writePositiveVarInt(classId);
-                serializer.writeBytes(byteArray, instance);
             }
             else
             {

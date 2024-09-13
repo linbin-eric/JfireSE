@@ -7,26 +7,31 @@ import io.github.karlatemp.unsafeaccessor.Unsafe;
 import lombok.Data;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 @Data
 public abstract class ClassInfo implements RefTracking
 {
     protected final        short      classId;
     protected final        byte[]     classNameBytes;
+    protected final        byte[]     classNameStringBytes;
+    protected final        byte       classNameStringCoder;
     protected final        Class<?>   clazz;
     protected final        boolean    refTrack;
     protected              Object[]   tracking;
     protected              int        refTrackingIndex = 0;
     protected              Serializer serializer;
+    protected              JfireSE    jfireSE;
+    protected              boolean    firstSerialized  = true;
     protected static final Unsafe     UNSAFE           = Unsafe.getUnsafe();
 
     public ClassInfo(short classId, Class<?> clazz, boolean refTrack)
     {
-        this.classId   = classId;
-        this.clazz     = clazz;
-        this.refTrack  = refTrack;
-        classNameBytes = clazz.getName().getBytes(StandardCharsets.UTF_8);
+        this.classId         = classId;
+        this.clazz           = clazz;
+        this.refTrack        = refTrack;
+        classNameBytes       = clazz.getName().getBytes(StandardCharsets.UTF_8);
+        classNameStringBytes = (byte[]) UNSAFE.getReference(clazz.getName(), ByteArray.STRING_VALUE_FIELD_OFFSET);
+        classNameStringCoder = UNSAFE.getByte(clazz.getName(), ByteArray.STRING_CODER_FIELD_OFFSET);
     }
 
     @Override
@@ -57,9 +62,13 @@ public abstract class ClassInfo implements RefTracking
     {
         if (refTrackingIndex != 0)
         {
-            Arrays.fill(tracking, 0, refTrackingIndex, null);
+            for (int i = 0; i < refTrackingIndex; i++)
+            {
+                tracking[i] = null;
+            }
             refTrackingIndex = 0;
         }
+        firstSerialized = true;
     }
 
     /**
@@ -108,7 +117,13 @@ public abstract class ClassInfo implements RefTracking
      */
     public Object readWithTrack(ByteArray byteArray)
     {
-        return serializer.read(byteArray, this);
+        Object result = serializer.read(byteArray, this);
+        if (firstSerialized)
+        {
+            firstSerialized = false;
+            jfireSE.addCleanClassInfo(this);
+        }
+        return result;
     }
 
     /**

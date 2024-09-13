@@ -28,6 +28,11 @@ public class StaticClasInfo extends ClassInfo
                 byteArray.writePositiveVarInt(classId);
                 byteArray.writePositiveVarInt(i);
             }
+            if (firstSerialized)
+            {
+                firstSerialized = false;
+                jfireSE.addCleanClassInfo(this);
+            }
         }
         else
         {

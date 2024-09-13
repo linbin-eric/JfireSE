@@ -1,7 +1,6 @@
 package com.jfirer.se2;
 
 import com.jfirer.baseutil.reflect.ReflectUtil;
-import com.jfirer.fse.InternalByteArray;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
 
 import java.lang.invoke.LambdaMetafactory;
@@ -80,24 +79,11 @@ public class ByteArray
         writerIndex = array.length;
     }
 
-    public static com.jfirer.fse.ByteArray allocate(int size)
+    public void resetFor(byte[] bytes)
     {
-        return new InternalByteArray(size);
-    }
-
-    public static com.jfirer.fse.ByteArray allocate()
-    {
-        return new InternalByteArray(1024);
-    }
-
-    public static com.jfirer.fse.ByteArray wrap(byte[] array)
-    {
-        return new InternalByteArray(array);
-    }
-
-    public void setNeedCheck(boolean needCheck)
-    {
-        this.needCheck = needCheck;
+        this.array  = bytes;
+        readerIndex = 0;
+        writerIndex = array.length;
     }
 
     protected void ensureNewWriterIndex(int newWriterIndex)
@@ -148,11 +134,6 @@ public class ByteArray
         byte[] result = new byte[writerIndex];
         System.arraycopy(array, 0, result, 0, writerIndex);
         return result;
-    }
-
-    public int getWriterIndex()
-    {
-        return writerIndex;
     }
 
     public void setWriterIndex(int writerIndex)
@@ -985,10 +966,15 @@ public class ByteArray
 
     public void writeString(String value)
     {
-        byte[] bytes    = (byte[]) UNSAFE.getReference(value, STRING_VALUE_FIELD_OFFSET);
-        byte   coder    = UNSAFE.getByte(value, STRING_CODER_FIELD_OFFSET);
-        int    idx      = writerIndex;
-        int    numBytes = bytes.length;
+        byte[] bytes = (byte[]) UNSAFE.getReference(value, STRING_VALUE_FIELD_OFFSET);
+        byte   coder = UNSAFE.getByte(value, STRING_CODER_FIELD_OFFSET);
+        writeString(bytes, coder);
+    }
+
+    public void writeString(byte[] bytes, byte coder)
+    {
+        int idx      = writerIndex;
+        int numBytes = bytes.length;
         ensureNewWriterIndex(idx + 9 + numBytes);
         UNSAFE.putByte(array, BYTE_ARRAY_OFFSET + idx, coder);
         writerIndex = idx + 1;

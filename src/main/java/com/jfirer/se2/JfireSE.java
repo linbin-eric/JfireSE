@@ -36,10 +36,11 @@ public interface JfireSE
 
     ClassInfo getOrCreateClassInfo(Class<?> clazz);
 
-    ClassInfo find(byte[] classNameBytes, int classId);
+    ClassInfo find(String className, int classId);
 
     ClassInfo find(int classId);
 
     Object readByUnderInstanceIdFlag(ByteArray byteArray, byte flag);
 
+    void addCleanClassInfo(ClassInfo classInfo);
 }
