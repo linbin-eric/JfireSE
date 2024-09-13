@@ -42,9 +42,4 @@ public interface JfireSE
 
     Object readByUnderInstanceIdFlag(ByteArray byteArray, byte flag);
 
-    Object readByNameIdContent(ByteArray byteArray, boolean refTracking);
-
-    Object readByIdInstanceId(ByteArray byteArray);
-
-    Object readByIdContent(ByteArray byteArray, boolean refTracking);
 }

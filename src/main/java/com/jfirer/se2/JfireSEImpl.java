@@ -14,7 +14,7 @@ public class JfireSEImpl implements JfireSE
 {
     private final boolean                  refTracking;
     private final int                      staticClassId;
-    private       int                      dyncmicClassId;
+    private       int                      dynamicClassId;
     /**
      * 用于存储序列化相关的 classInfo
      */
@@ -31,13 +31,17 @@ public class JfireSEImpl implements JfireSE
 
     public JfireSEImpl(boolean refTracking, StaticClasInfo[] staticClasInfos)
     {
+        for (StaticClasInfo each : staticClasInfos)
+        {
+            each.setSerializer(serializerFactory.getSerializer(each.getClazz()));
+        }
         this.refTracking       = refTracking;
         this.staticClassId     = staticClasInfos.length - 1;
         serializedClassInfos   = new ClassInfo[staticClasInfos.length * 2];
         deSerializedClassInfos = new ClassInfo[serializedClassInfos.length];
         System.arraycopy(staticClasInfos, 0, serializedClassInfos, 0, staticClasInfos.length);
         System.arraycopy(staticClasInfos, 0, deSerializedClassInfos, 0, staticClasInfos.length);
-        dyncmicClassId = staticClassId + 1;
+        dynamicClassId = staticClassId + 1;
     }
 
     @Override
@@ -53,15 +57,15 @@ public class JfireSEImpl implements JfireSE
             classInfoCache = classInfo;
             return classInfo;
         }
-        if (dyncmicClassId == serializedClassInfos.length)
+        if (dynamicClassId == serializedClassInfos.length)
         {
             ClassInfo[] tmp = new ClassInfo[serializedClassInfos.length * 2];
             System.arraycopy(serializedClassInfos, 0, tmp, 0, serializedClassInfos.length);
             serializedClassInfos = tmp;
         }
-        DynamicClassInfo dynamicClassInfo = new DynamicClassInfo((short) dyncmicClassId, clazz, refTracking);
-        serializedClassInfos[dyncmicClassId] = dynamicClassInfo;
-        dyncmicClassId++;
+        DynamicClassInfo dynamicClassInfo = new DynamicClassInfo((short) dynamicClassId, clazz, refTracking);
+        serializedClassInfos[dynamicClassId] = dynamicClassInfo;
+        dynamicClassId++;
         Serializer serializer = serializerFactory.getSerializer(clazz);
         dynamicClassInfo.setSerializer(serializer);
         classInfoCache = dynamicClassInfo;
@@ -70,7 +74,7 @@ public class JfireSEImpl implements JfireSE
 
     private void resetSerialized()
     {
-        for (int i = staticClassId; i < dyncmicClassId; i++)
+        for (int i = staticClassId; i < dynamicClassId; i++)
         {
             serializedClassInfos[i].reset();
         }
@@ -207,28 +211,5 @@ public class JfireSEImpl implements JfireSE
             }
             default -> throw new RuntimeException("未知的序列化类型");
         }
-    }
-
-    @Override
-    public Object readByNameIdContent(ByteArray byteArray, boolean refTracking)
-    {
-        byte[]    classNameBytes = byteArray.readBytesWithSizeEmbedded();
-        int       classId        = byteArray.readPositiveVarInt();
-        ClassInfo classInfo      = find(classNameBytes, classId);
-        return refTracking ? classInfo.readWithTrack(byteArray) : classInfo.readWithoutTrack(byteArray);
-    }
-
-    @Override
-    public Object readByIdInstanceId(ByteArray byteArray)
-    {
-        int classId = byteArray.readPositiveVarInt();
-        return find(classId).getInstanceById(byteArray.readPositiveVarInt());
-    }
-
-    @Override
-    public Object readByIdContent(ByteArray byteArray, boolean refTracking)
-    {
-        ClassInfo classInfo = find(byteArray.readPositiveVarInt());
-        return refTracking ? classInfo.readWithTrack(byteArray) : classInfo.readWithoutTrack(byteArray);
     }
 }

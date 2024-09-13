@@ -1,14 +1,12 @@
 package com.jfirer.se2.serializer;
 
 import com.jfirer.se2.JfireSE;
-import com.jfirer.se2.serializer.impl.ArraySerializer;
-import com.jfirer.se2.serializer.impl.BoxedArraySerializer;
-import com.jfirer.se2.serializer.impl.BoxedTypeSerializer;
+import com.jfirer.se2.serializer.impl.*;
 import com.jfirer.se2.serializer.impl.ObjectSerializer.ObjectSerializer;
-import com.jfirer.se2.serializer.impl.PrimitiveArraySerializer;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class SerializerFactory
 {
@@ -36,6 +34,26 @@ public class SerializerFactory
         store.put(Float[].class, new BoxedArraySerializer.FloatArraySerializer());
         store.put(String[].class, new BoxedArraySerializer.StringArraySerializer());
         store.put(String.class, new BoxedTypeSerializer.StringSerializer());
+        store.put(Byte.class, new BoxedTypeSerializer.ByteSerializer());
+        store.put(Integer.class, new BoxedTypeSerializer.IntegerSerializer());
+        store.put(Character.class, new BoxedTypeSerializer.CharacterSerializer());
+        store.put(Long.class, new BoxedTypeSerializer.LongSerializer());
+        store.put(Float.class, new BoxedTypeSerializer.FloatSerializer());
+        store.put(Double.class, new BoxedTypeSerializer.FloatSerializer());
+        store.put(Boolean.class, new BoxedTypeSerializer.BooleanSerializer());
+        store.put(Short.class, new BoxedTypeSerializer.ShortSerializer());
+        store.put(ArrayList.class, new ListSerializer(jfireSE, ArrayList.class));
+        store.put(LinkedList.class, new ListSerializer(jfireSE, LinkedList.class));
+        store.put(HashMap.class, new MapSerializer(jfireSE, HashMap.class));
+        store.put(TreeMap.class, new MapSerializer(jfireSE, TreeMap.class));
+        store.put(ConcurrentHashMap.class, new MapSerializer(jfireSE, ConcurrentHashMap.class));
+        store.put(LinkedHashMap.class, new MapSerializer(jfireSE, LinkedHashMap.class));
+        store.put(HashSet.class, new SetSerializer(HashSet.class, jfireSE));
+        store.put(TreeSet.class, new SetSerializer(TreeSet.class, jfireSE));
+        store.put(ConcurrentSkipListSet.class, new SetSerializer(ConcurrentSkipListSet.class, jfireSE));
+        store.put(LinkedHashSet.class, new SetSerializer(LinkedHashSet.class, jfireSE));
+        store.put(Date.class, new DateSerializer());
+        store.put(java.sql.Date.class, new SqlDateSerializer());
     }
 
     public Serializer getSerializer(Class<?> clazz)

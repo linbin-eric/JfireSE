@@ -2,7 +2,7 @@ package org.example;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
-import io.fury.Fury;
+import org.apache.fury.Fury;
 import org.example.sm.TestDataSm;
 import org.example.sm2.TestDataSm2;
 import org.junit.Assert;
@@ -47,7 +47,7 @@ public class FunctionTest
     @Test
     public void test3()
     {
-        Fury fury = Fury.builder().requireClassRegistration(false).build();
+        Fury       fury = Fury.builder().requireClassRegistration(false).build();
         TestData[] data = new TestData[2];
         data[0] = new TestData();
         fury.serialize(data);

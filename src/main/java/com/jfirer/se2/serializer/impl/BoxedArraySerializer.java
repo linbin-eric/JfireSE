@@ -5,18 +5,17 @@ import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.classinfo.RefTracking;
 import com.jfirer.se2.serializer.Serializer;
 
-public abstract class BoxedArraySerializer<T> implements Serializer
+public abstract class BoxedArraySerializer implements Serializer
 {
-    public static class IntegerArraySerializer extends BoxedArraySerializer<Integer[]>
+    public static class IntegerArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Integer[] arr = (Integer[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Integer each : arr)
             {
-                Integer each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -53,16 +52,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         }
     }
 
-    public static class LongArraySerializer extends BoxedArraySerializer<Long[]>
+    public static class LongArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Long[] arr = (Long[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Long each : arr)
             {
-                Long each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -99,16 +97,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         }
     }
 
-    public static class FloatArraySerializer extends BoxedArraySerializer<Float[]>
+    public static class FloatArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Float[] arr = (Float[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Float each : arr)
             {
-                Float each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -145,16 +142,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         }
     }
 
-    public static class DoubleArraySerializer extends BoxedArraySerializer<Double[]>
+    public static class DoubleArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Double[] arr = (Double[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Double each : arr)
             {
-                Double each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -191,16 +187,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         }
     }
 
-    public static class ByteArraySerializer extends BoxedArraySerializer<Byte[]>
+    public static class ByteArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Byte[] arr = (Byte[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Byte each : arr)
             {
-                Byte each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -237,16 +232,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         }
     }
 
-    public static class BooleanArraySerializer extends BoxedArraySerializer<Boolean[]>
+    public static class BooleanArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Boolean[] arr = (Boolean[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Boolean each : arr)
             {
-                Boolean each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -283,16 +277,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         }
     }
 
-    public static class CharArraySerializer extends BoxedArraySerializer<Character[]>
+    public static class CharArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             Character[] arr = (Character[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Character each : arr)
             {
-                Character each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -336,9 +329,8 @@ public abstract class BoxedArraySerializer<T> implements Serializer
         {
             Short[] arr = (Short[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (Short each : arr)
             {
-                Short each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -374,16 +366,15 @@ public abstract class BoxedArraySerializer<T> implements Serializer
             return arr;
         }
     }
-    public static  class  StringArraySerializer extends BoxedArraySerializer<String[]>
+    public static  class  StringArraySerializer extends BoxedArraySerializer
     {
         @Override
         public void writeBytes(ByteArray byteArray, Object instance)
         {
             String[] arr = (String[]) instance;
             byteArray.writePositiveVarInt(arr.length);
-            for (int i = 0; i < arr.length; i++)
+            for (String each : arr)
             {
-                String each = arr[i];
                 if (each == null)
                 {
                     byteArray.put(JfireSE.NULL);
