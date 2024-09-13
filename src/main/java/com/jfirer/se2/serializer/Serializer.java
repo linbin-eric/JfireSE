@@ -22,4 +22,9 @@ public interface Serializer
      * @return
      */
     Object read(ByteArray byteArray, RefTracking refTracking);
+
+    default void init()
+    {
+        //为了 ObjectSerializer 和 ArraySerializer 需要初始化的类提供。
+    }
 }

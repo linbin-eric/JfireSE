@@ -1,20 +1,20 @@
-package com.jfirer.se2.serializer.impl;
+package com.jfirer.se2.serializer.impl.jdk;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.classinfo.RefTracking;
 import com.jfirer.se2.serializer.Serializer;
 
-public class SqlDateSerializer implements Serializer
+public class DateSerializer implements Serializer
 {
     @Override
     public void writeBytes(ByteArray byteArray, Object instance)
     {
-        byteArray.writeVarLong(((java.sql.Date) instance).getTime());
+        byteArray.writeVarLong(((java.util.Date) instance).getTime());
     }
 
     @Override
     public Object read(ByteArray byteArray, RefTracking refTracking)
     {
-        return new java.sql.Date(byteArray.readVarLong());
+        return new java.util.Date(byteArray.readVarLong());
     }
 }

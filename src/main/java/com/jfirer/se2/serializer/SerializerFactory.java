@@ -3,7 +3,9 @@ package com.jfirer.se2.serializer;
 import com.jfirer.se2.JfireSE;
 import com.jfirer.se2.serializer.impl.*;
 import com.jfirer.se2.serializer.impl.ObjectSerializer.ObjectSerializer;
+import com.jfirer.se2.serializer.impl.jdk.*;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -54,17 +56,34 @@ public class SerializerFactory
         store.put(LinkedHashSet.class, new SetSerializer(LinkedHashSet.class, jfireSE));
         store.put(Date.class, new DateSerializer());
         store.put(java.sql.Date.class, new SqlDateSerializer());
+        store.put(Calendar.getInstance().getClass(), new CalendarSerializer());
+        store.put(Method.class, new MethodSerializer());
+        store.put(Class.class, new ClassSerializer());
     }
 
     public Serializer getSerializer(Class<?> clazz)
     {
-        if (clazz.isArray())
+        Serializer match = store.get(clazz);
+        if (match != null)
         {
-            return store.computeIfAbsent(clazz, key -> new ArraySerializer(key, jfireSE));
+            return match;
         }
         else
         {
-            return store.computeIfAbsent(clazz, key -> ObjectSerializer.buildCompileVersion(key, jfireSE));
+            if (clazz.isArray())
+            {
+                ArraySerializer arraySerializer = new ArraySerializer(clazz, jfireSE);
+                store.putIfAbsent(clazz, arraySerializer);
+                arraySerializer.init();
+                return arraySerializer;
+            }
+            else
+            {
+                Serializer serializer = ObjectSerializer.buildCompileVersion(clazz, jfireSE);
+                store.putIfAbsent(clazz, serializer);
+                serializer.init();
+                return serializer;
+            }
         }
     }
 }

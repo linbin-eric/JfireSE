@@ -13,13 +13,18 @@ import static com.jfirer.se2.JfireSE.*;
 public class ArraySerializer implements Serializer
 {
     private final Class<?>  componentType;
-    private final ClassInfo typeDefinedClassInfo;
+    private       ClassInfo typeDefinedClassInfo;
     private final JfireSE   jfireSE;
 
     public ArraySerializer(Class<?> clazz, JfireSE jfireSE)
     {
-        this.jfireSE         = jfireSE;
-        this.componentType   = clazz.getComponentType();
+        this.jfireSE       = jfireSE;
+        this.componentType = clazz.getComponentType();
+    }
+
+    @Override
+    public void init()
+    {
         typeDefinedClassInfo = jfireSE.getOrCreateClassInfo(componentType);
     }
 

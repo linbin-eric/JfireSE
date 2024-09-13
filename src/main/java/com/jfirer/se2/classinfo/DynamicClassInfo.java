@@ -35,7 +35,7 @@ public class DynamicClassInfo extends ClassInfo
         {
             if (firstSerialized)
             {
-                firstSerialized = true;
+                firstSerialized = false;
                 addTracking(instance);
                 byteArray.put(JfireSE.NAME_ID_CONTENT_TRACK);
                 byteArray.writeBytesWithSizeEmbedded(classNameBytes);
@@ -63,7 +63,7 @@ public class DynamicClassInfo extends ClassInfo
         {
             if (firstSerialized)
             {
-                firstSerialized = true;
+                firstSerialized = false;
                 byteArray.put(JfireSE.NAME_ID_CONTENT_UN_TRACK);
                 byteArray.writeBytesWithSizeEmbedded(classNameBytes);
                 byteArray.writePositiveVarInt(classId);

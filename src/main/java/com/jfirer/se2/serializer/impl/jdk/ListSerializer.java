@@ -1,4 +1,4 @@
-package com.jfirer.se2.serializer.impl;
+package com.jfirer.se2.serializer.impl.jdk;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;

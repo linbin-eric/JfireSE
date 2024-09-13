@@ -23,18 +23,15 @@ public class JfireSEImpl implements JfireSE
      * 用于存储逆序列化过程中的临时信息
      */
     private       ClassInfo[]              deSerializedClassInfos;
-    private       ByteArray                byteArray         = new ByteArray(1000);
+    private       ByteArray                byteArray           = new ByteArray(1000);
     private       ClassInfo                classInfoCache;
-    private       Map<Class<?>, ClassInfo> classInfoMap      = new HashMap<>();
-    private       SerializerFactory        serializerFactory = new SerializerFactory(this);
-    private       Map<byte[], ClassInfo>   classInfoCacheMap = new HashMap<>();
+    private       Map<Class<?>, ClassInfo> classInfoMap        = new HashMap<>();
+    private       SerializerFactory        serializerFactory   = new SerializerFactory(this);
+    private       Map<byte[], ClassInfo>   classInfoCacheMap   = new HashMap<>();
+    private       Map<byte[], Class<?>>    classNameBytesCache = new HashMap<>();
 
     public JfireSEImpl(boolean refTracking, StaticClasInfo[] staticClasInfos)
     {
-        for (StaticClasInfo each : staticClasInfos)
-        {
-            each.setSerializer(serializerFactory.getSerializer(each.getClazz()));
-        }
         this.refTracking       = refTracking;
         this.staticClassId     = staticClasInfos.length - 1;
         serializedClassInfos   = new ClassInfo[staticClasInfos.length * 2];
@@ -42,6 +39,10 @@ public class JfireSEImpl implements JfireSE
         System.arraycopy(staticClasInfos, 0, serializedClassInfos, 0, staticClasInfos.length);
         System.arraycopy(staticClasInfos, 0, deSerializedClassInfos, 0, staticClasInfos.length);
         dynamicClassId = staticClassId + 1;
+        for (StaticClasInfo each : staticClasInfos)
+        {
+            each.setSerializer(serializerFactory.getSerializer(each.getClazz()));
+        }
     }
 
     @Override
@@ -141,34 +142,36 @@ public class JfireSEImpl implements JfireSE
     @Override
     public ClassInfo find(byte[] classNameBytes, int classId)
     {
-        try
+        Class<?> clazz = classNameBytesCache.computeIfAbsent(classNameBytes, bytes -> {
+            try
+            {
+                return Class.forName(new String(classNameBytes, StandardCharsets.UTF_8));
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new RuntimeException(e);
+            }
+        });
+        ClassInfo classInfo = getOrCreateClassInfo(clazz);
+        if (deSerializedClassInfos == null)
         {
-            Class<?>  clazz     = Class.forName(new String(classNameBytes, StandardCharsets.UTF_8));
-            ClassInfo classInfo = getOrCreateClassInfo(clazz);
-            if (deSerializedClassInfos == null)
-            {
-                deSerializedClassInfos          = new ClassInfo[classId + 1];
-                deSerializedClassInfos[classId] = classInfo;
-            }
-            else if (classId >= deSerializedClassInfos.length)
-            {
-                int newLen = deSerializedClassInfos.length * 2;
-                newLen = newLen > classId ? newLen : classId + 1;
-                ClassInfo[] tmp = new ClassInfo[newLen];
-                System.arraycopy(deSerializedClassInfos, 0, tmp, 0, deSerializedClassInfos.length);
-                deSerializedClassInfos          = tmp;
-                deSerializedClassInfos[classId] = classInfo;
-            }
-            else
-            {
-                deSerializedClassInfos[classId] = classInfo;
-            }
-            return classInfo;
+            deSerializedClassInfos          = new ClassInfo[classId + 1];
+            deSerializedClassInfos[classId] = classInfo;
         }
-        catch (ClassNotFoundException e)
+        else if (classId >= deSerializedClassInfos.length)
         {
-            throw new RuntimeException(e);
+            int newLen = deSerializedClassInfos.length * 2;
+            newLen = newLen > classId ? newLen : classId + 1;
+            ClassInfo[] tmp = new ClassInfo[newLen];
+            System.arraycopy(deSerializedClassInfos, 0, tmp, 0, deSerializedClassInfos.length);
+            deSerializedClassInfos          = tmp;
+            deSerializedClassInfos[classId] = classInfo;
         }
+        else
+        {
+            deSerializedClassInfos[classId] = classInfo;
+        }
+        return classInfo;
     }
 
     @Override

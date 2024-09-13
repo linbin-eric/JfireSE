@@ -47,11 +47,13 @@ public class FunctionTest
     @Test
     public void test3()
     {
-        Fury       fury = Fury.builder().requireClassRegistration(false).build();
-        TestData[] data = new TestData[2];
-        data[0] = new TestData();
-        fury.serialize(data);
+        Fury   fury   = Fury.builder().requireClassRegistration(false).withRefTracking(true).build();
+        Home   home   = new Home();
+        Person person = new Person();
+        home.setPerson(person);
+        person.setHome(home);
+        fury.serialize(home);
+        JfireSE jfireSE = JfireSE.supportRefTracking(true).build();
+        jfireSE.serialize(home);
     }
-
-
 }

@@ -10,13 +10,18 @@ public class VariableFieldInfo extends FieldInfo
 {
     private final JfireSE   jfireSE;
     private       ClassInfo classInfo;
-    private final ClassInfo firstClassInfo;
+    private       ClassInfo firstClassInfo;
 
     public VariableFieldInfo(Field field, JfireSE jfireSE)
     {
         super(field);
-        classInfo    = jfireSE.getOrCreateClassInfo(field.getType());
         this.jfireSE = jfireSE;
+    }
+
+    @Override
+    public void init()
+    {
+        classInfo = jfireSE.getOrCreateClassInfo(field.getType());
         if (field.getType().isInterface())
         {
             firstClassInfo = null;
@@ -38,28 +43,14 @@ public class VariableFieldInfo extends FieldInfo
         else
         {
             Class<?> objClass = obj.getClass();
-            if (objClass == classInfo.getClazz())
+            classInfo = classInfo.getClazz() == objClass ? classInfo : jfireSE.getOrCreateClassInfo(objClass);
+            if (classInfo == firstClassInfo)
             {
-                if (classInfo == firstClassInfo)
-                {
-                    classInfo.writeKnownClazz(byteArray, obj);
-                }
-                else
-                {
-                    classInfo.write(byteArray, obj);
-                }
+                classInfo.writeKnownClazz(byteArray, obj);
             }
             else
             {
-                classInfo = jfireSE.getOrCreateClassInfo(objClass);
-                if (classInfo == firstClassInfo)
-                {
-                    classInfo.writeKnownClazz(byteArray, obj);
-                }
-                else
-                {
-                    classInfo.write(byteArray, obj);
-                }
+                classInfo.write(byteArray, obj);
             }
         }
     }
@@ -76,7 +67,8 @@ public class VariableFieldInfo extends FieldInfo
         {
             switch (flag)
             {
-                case JfireSE.NAME_ID_CONTENT_TRACK,JfireSE.NAME_ID_CONTENT_UN_TRACK, JfireSE.ID_INSTANCE_ID,JfireSE.ID_CONTENT_TRACK,JfireSE.ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByUnderInstanceIdFlag(byteArray, flag));
+                case JfireSE.NAME_ID_CONTENT_TRACK, JfireSE.NAME_ID_CONTENT_UN_TRACK, JfireSE.ID_INSTANCE_ID, JfireSE.ID_CONTENT_TRACK,
+                     JfireSE.ID_CONTENT_UN_TRACK -> accessor.setObject(instance, jfireSE.readByUnderInstanceIdFlag(byteArray, flag));
                 case JfireSE.INSTANCE_ID -> accessor.setObject(instance, firstClassInfo.getInstanceById(byteArray.readPositiveVarInt()));
                 case JfireSE.CONTENT_TRACK -> accessor.setObject(instance, firstClassInfo.readWithTrack(byteArray));
                 case JfireSE.CONTENT_UN_TRACK -> accessor.setObject(instance, firstClassInfo.readWithoutTrack(byteArray));

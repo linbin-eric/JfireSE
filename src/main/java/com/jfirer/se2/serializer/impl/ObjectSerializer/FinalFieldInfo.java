@@ -8,14 +8,19 @@ import java.lang.reflect.Field;
 
 public class FinalFieldInfo extends FieldInfo
 {
-    private ClassInfo   classInfo;
-    private JfireSE jfireSE;
+    private ClassInfo classInfo;
+    private JfireSE   jfireSE;
 
     public FinalFieldInfo(Field field, JfireSE jfireSE)
     {
         super(field);
-        classInfo    = jfireSE.getOrCreateClassInfo(field.getType());
         this.jfireSE = jfireSE;
+    }
+
+    @Override
+    public void init()
+    {
+        classInfo = jfireSE.getOrCreateClassInfo(field.getType());
     }
 
     @Override

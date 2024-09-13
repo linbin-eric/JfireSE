@@ -90,6 +90,7 @@ public class JfireSEConfig
         staticRegisterClass(ConcurrentSkipListSet.class);
         staticRegisterClass(Date.class);
         staticRegisterClass(java.sql.Date.class);
+        staticRegisterClass(Calendar.getInstance().getClass());
     }
 
     public JfireSEConfig refTracking()

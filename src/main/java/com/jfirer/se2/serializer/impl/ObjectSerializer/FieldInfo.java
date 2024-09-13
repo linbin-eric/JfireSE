@@ -26,4 +26,8 @@ public abstract class FieldInfo
     public abstract void write(ByteArray byteArray, Object instance);
 
     public abstract void read(ByteArray byteArray, Object instance);
+
+    public void init()
+    {
+    }
 }

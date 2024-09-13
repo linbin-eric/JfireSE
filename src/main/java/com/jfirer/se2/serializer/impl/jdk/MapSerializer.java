@@ -1,4 +1,4 @@
-package com.jfirer.se2.serializer.impl;
+package com.jfirer.se2.serializer.impl.jdk;
 
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
@@ -23,7 +23,7 @@ public class MapSerializer implements Serializer
     public MapSerializer(JfireSE jfireSE, Class<? extends Map> type)
     {
         this.jfireSE = jfireSE;
-        if (type.equals(Map.class))
+        if (type.equals(HashMap.class))
         {
             this.type = HASHMAP;
         }
