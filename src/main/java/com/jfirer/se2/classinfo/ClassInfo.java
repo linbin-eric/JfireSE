@@ -15,11 +15,11 @@ public abstract class ClassInfo implements RefTracking
     protected final        Class<?>   clazz;
     protected final        boolean    refTrack;
     protected              Object[]   tracking;
-    protected              int        refTrackingIndex = 0;
+    protected              int        refTrackingIndex            = 0;
     protected              Serializer serializer;
     protected              JfireSE    jfireSE;
-    protected              boolean    needClean        = false;
-    protected static final Unsafe     UNSAFE           = Unsafe.getUnsafe();
+    protected              boolean    firstSerializedOrAddTracked = true;
+    protected static final Unsafe     UNSAFE                      = Unsafe.getUnsafe();
 
     public ClassInfo(short classId, Class<?> clazz, boolean refTrack)
     {
@@ -64,7 +64,7 @@ public abstract class ClassInfo implements RefTracking
             }
             refTrackingIndex = 0;
         }
-        needClean = false;
+        firstSerializedOrAddTracked = true;
     }
 
     /**
@@ -114,9 +114,9 @@ public abstract class ClassInfo implements RefTracking
     public Object readWithTrack(ByteArray byteArray)
     {
         Object result = serializer.read(byteArray, this);
-        if (!needClean)
+        if (firstSerializedOrAddTracked)
         {
-            needClean = true;
+            firstSerializedOrAddTracked = false;
             jfireSE.scheduleForClean(this);
         }
         return result;

@@ -15,19 +15,9 @@ public interface JfireSE
     byte CONTENT_TRACK            = 8;
     byte CONTENT_UN_TRACK         = 9;
 
-    static JfireSEConfig supportRefTracking(boolean support)
+    static JfireSEConfig config()
     {
-        return new JfireSEConfig().setRefTracking(support);
-    }
-
-    static JfireSEConfig staticRegisterClass(Class<?> clazz)
-    {
-        return new JfireSEConfig().staticRegisterClass(clazz);
-    }
-
-    static JfireSE build()
-    {
-        return new JfireSEConfig().build();
+        return new JfireSEConfig();
     }
 
     byte[] serialize(Object instance);

@@ -31,9 +31,9 @@ public class RegisterClasInfo extends ClassInfo
                 byteArray.writePositiveVarInt(classId);
                 byteArray.writePositiveVarInt(i);
             }
-            if (!needClean)
+            if (firstSerializedOrAddTracked)
             {
-                needClean = true;
+                firstSerializedOrAddTracked = false;
                 jfireSE.scheduleForClean(this);
             }
         }

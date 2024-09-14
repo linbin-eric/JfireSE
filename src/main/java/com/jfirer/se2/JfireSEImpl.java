@@ -168,12 +168,8 @@ public class JfireSEImpl implements JfireSE
             ClassInfo[] tmp = new ClassInfo[newLen];
             System.arraycopy(deSerializedClassInfos, 0, tmp, 0, deSerializedClassInfos.length);
             deSerializedClassInfos          = tmp;
-            deSerializedClassInfos[classId] = classInfo;
         }
-        else
-        {
-            deSerializedClassInfos[classId] = classInfo;
-        }
+        deSerializedClassInfos[classId] = classInfo;
         return classInfo;
     }
 

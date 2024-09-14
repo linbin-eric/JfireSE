@@ -36,7 +36,7 @@ public class FunctionTest
         TestDataSm[] sms = new TestDataSm[2];
         sms[0] = new TestDataSm().setC("xx");
         testData.setSms(sms);
-        JfireSE jfireSE = JfireSE.build();
+        JfireSE jfireSE = JfireSE.config().build();
         byte[]  bytes   = jfireSE.serialize(testData);
         Assert.assertEquals(testData, jfireSE.deSerialize(bytes));
         TestData read = (TestData) jfireSE.deSerialize(bytes);
@@ -53,7 +53,7 @@ public class FunctionTest
         home.setPerson(person);
         person.setHome(home);
         fury.serialize(home);
-        JfireSE jfireSE = JfireSE.supportRefTracking(true).build();
+        JfireSE jfireSE = JfireSE.config().refTracking().build();
         jfireSE.serialize(home);
     }
 }

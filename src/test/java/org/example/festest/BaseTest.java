@@ -9,7 +9,7 @@ public class BaseTest
     @Test
     public void test()
     {
-        JfireSE   jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE   jfireSE   = JfireSE.config().refTracking().build();
         User      user      = new User();
         user.setAge(123);
         user.setName("aaa");

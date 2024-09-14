@@ -20,7 +20,7 @@ public class RightTest
     {
         // 创建需要序列化的对象
         BaseData baseData  = new BaseData(1);
-        JfireSE  jfireSE   = JfireSE.supportRefTracking(true).staticRegisterClass(baseData.getClass()).build();
+        JfireSE  jfireSE   = JfireSE.config().refTracking().staticRegisterClass(baseData.getClass()).build();
         byte[]   serialize = jfireSE.serialize(baseData);
         // 传入二进制buffer对象，读取其中的 数据并且反序列化成对象
         BaseData result = (BaseData) jfireSE.deSerialize(serialize);
@@ -76,7 +76,7 @@ public class RightTest
     public void wrapTest() throws IllegalArgumentException, IllegalAccessException, UnsupportedEncodingException, ClassNotFoundException, InstantiationException
     {
         WrapData wrapData  = new WrapData();
-        JfireSE  jfireSE   = JfireSE.supportRefTracking(true).staticRegisterClass(WrapData.class).build();
+        JfireSE  jfireSE   = JfireSE.config().refTracking().staticRegisterClass(WrapData.class).build();
         byte[]   serialize = jfireSE.serialize(wrapData);
         WrapData result    = (WrapData) jfireSE.deSerialize(serialize);
         assertEquals(result.getA(), wrapData.getA());
@@ -150,7 +150,7 @@ public class RightTest
         Person tPerson = new Person("zhangshi[in", 30);
         person.setLeader(tPerson);
         tPerson.setLeader(person);
-        JfireSE jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE jfireSE   = JfireSE.config().refTracking().build();
         byte[]  serialize = jfireSE.serialize(person);
         Person  result    = (Person) jfireSE.deSerialize(serialize);
         assertEquals("zhangshi[in", result.getLeader().getName());
@@ -159,7 +159,7 @@ public class RightTest
     @Test
     public void objectTest() throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, InstantiationException
     {
-        JfireSE  jfireSE    = JfireSE.supportRefTracking(true).build();
+        JfireSE  jfireSE    = JfireSE.config().refTracking().build();
         Calendar calendar   = Calendar.getInstance();
         byte[]   serialize  = jfireSE.serialize(calendar);
         Calendar reCalendar = (Calendar) jfireSE.deSerialize(serialize);
@@ -175,7 +175,7 @@ public class RightTest
         {
             list.add(new BaseData(i));
         }
-        JfireSE             jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE             jfireSE   = JfireSE.config().refTracking().build();
         byte[]              serialize = jfireSE.serialize(list);
         ArrayList<BaseData> result    = (ArrayList<BaseData>) jfireSE.deSerialize(serialize);
         Assert.assertTrue(list.equals(result));
@@ -184,7 +184,7 @@ public class RightTest
     @Test
     public void baseDataTest()
     {
-        JfireSE  jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE  jfireSE   = JfireSE.config().refTracking().build();
         BaseData baseData  = new BaseData();
         byte[]   serialize = jfireSE.serialize(baseData);
         BaseData result    = (BaseData) jfireSE.deSerialize(serialize);
@@ -199,7 +199,7 @@ public class RightTest
         array[1] = new BaseData();
         array[2] = new LongData();
         array[3] = new WrapData();
-        JfireSE  jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE  jfireSE   = JfireSE.config().refTracking().build();
         byte[]   serialize = jfireSE.serialize(array);
         Object[] result    = (Object[]) jfireSE.deSerialize(serialize);
         Assert.assertTrue(((Person) result[0]).equals(array[0]));
@@ -209,7 +209,7 @@ public class RightTest
     public void byteArrayTest()
     {
         byte[]  array     = new byte[]{1, 2, 5, 6, 8, 9};
-        JfireSE jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE jfireSE   = JfireSE.config().refTracking().build();
         byte[]  serialize = jfireSE.serialize(array);
         byte[]  result    = (byte[]) jfireSE.deSerialize(serialize);
         for (int i = 0; i < array.length; i++)
@@ -222,7 +222,7 @@ public class RightTest
     public void booleanArrayTest()
     {
         boolean[] array     = new boolean[]{true, false, false, true, true, true};
-        JfireSE   jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE   jfireSE   = JfireSE.config().refTracking().build();
         byte[]    serialize = jfireSE.serialize(array);
         boolean[] result    = (boolean[]) jfireSE.deSerialize(serialize);
         for (int i = 0; i < array.length; i++)
@@ -234,7 +234,7 @@ public class RightTest
     @Test
     public void arrayDataTest()
     {
-        JfireSE jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE jfireSE   = JfireSE.config().refTracking().build();
         byte[]  serialize = jfireSE.serialize(new ArrayData());
         jfireSE.deSerialize(serialize);
     }
@@ -246,7 +246,7 @@ public class RightTest
         byte[] key    = new byte[16];
         random.nextBytes(key);
         Object[] data      = new Object[]{Integer.valueOf(14), new BaseData[]{new BaseData(), new BaseData()}};
-        JfireSE  jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE  jfireSE   = JfireSE.config().refTracking().build();
         byte[]   serialize = jfireSE.serialize(data);
         Object[] result    = (Object[]) jfireSE.deSerialize(serialize);
         assertEquals(14, result[0]);
@@ -261,7 +261,7 @@ public class RightTest
     public void arryaNotRegisterClassSeri()
     {
         ArrayRefenceHolder holder    = new ArrayRefenceHolder();
-        JfireSE            jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE            jfireSE   = JfireSE.config().refTracking().build();
         byte[]             serialize = jfireSE.serialize(holder);
         ArrayRefenceHolder result    = (ArrayRefenceHolder) jfireSE.deSerialize(serialize);
         assertArrayEquals(new int[]{1, 2}, result.getA()[0]);
@@ -274,7 +274,7 @@ public class RightTest
     public void methodObjectTest() throws NoSuchMethodException
     {
         Method  methodObjectTest = this.getClass().getDeclaredMethod("methodObjectTest");
-        JfireSE jfireSE          = JfireSE.supportRefTracking(true).build();
+        JfireSE jfireSE          = JfireSE.config().refTracking().build();
         byte[]  serialize        = jfireSE.serialize(methodObjectTest);
         Method  method           = (Method) jfireSE.deSerialize(serialize);
         System.out.println(method.equals(methodObjectTest));

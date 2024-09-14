@@ -20,7 +20,7 @@ public class MapTest
     {
         MapDemo demo = new MapDemo();
         demo.getMap().put(1, new BaseData());
-        JfireSE jfireSE   = JfireSE.staticRegisterClass(MapDemo.class).refTracking().build();
+        JfireSE jfireSE   = JfireSE.config().staticRegisterClass(MapDemo.class).refTracking().build();
         byte[]  serialize = jfireSE.serialize(demo);
         jfireSE.deSerialize(serialize);
     }

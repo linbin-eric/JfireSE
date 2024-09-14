@@ -22,8 +22,7 @@ public class DynamicClassInfo extends ClassInfo
     @Override
     public void write(ByteArray byteArray, Object instance)
     {
-        //如果needClean 为 false，意味着这个 classInfo 是首次输出。后续必然需要清理。
-        if (!needClean)
+        if (firstSerializedOrAddTracked)
         {
             if (refTrack)
             {
@@ -33,7 +32,7 @@ public class DynamicClassInfo extends ClassInfo
             byteArray.writeString(classNameStringBytes, classNameStringCoder);
             byteArray.writePositiveVarInt(classId);
             serializer.writeBytes(byteArray, instance);
-            needClean = true;
+            firstSerializedOrAddTracked = false;
             jfireSE.scheduleForClean(this);
         }
         else

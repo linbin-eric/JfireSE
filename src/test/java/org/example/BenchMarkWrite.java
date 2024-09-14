@@ -30,7 +30,7 @@ public class BenchMarkWrite
     Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
                             .withRefTracking(true).build();
-    JfireSE   jfireSE = JfireSE.supportRefTracking(true).build();
+    JfireSE   jfireSE = JfireSE.config().refTracking().build();
 
     public void testFSENoCompile()
     {

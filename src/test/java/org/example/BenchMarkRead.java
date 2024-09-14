@@ -24,7 +24,7 @@ public class BenchMarkRead
     Fury     fury       = Fury.builder().withLanguage(Language.JAVA)//
                               .requireClassRegistration(false)//
                               .withRefTracking(true).build();
-    JfireSE  jfireSE    = JfireSE.supportRefTracking(true).build();
+    JfireSE  jfireSE    = JfireSE.config().refTracking().build();
     TestData data       = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
     byte[]   serialize  = jfireSE.serialize(data);
     byte[]   serialize2 = fury.serialize(data);

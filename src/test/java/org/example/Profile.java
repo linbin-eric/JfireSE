@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class Profile
 {
-    JfireSE  jfireSE   = JfireSE.supportRefTracking(true).build();
+    JfireSE  jfireSE   = JfireSE.config().refTracking().build();
     TestData data      = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
     byte[]   serialize = jfireSE.serialize(data);
     Object   unuse     = jfireSE.deSerialize(serialize);
@@ -15,7 +15,7 @@ public class Profile
     @Test
     public void test()
     {
-        for (int i = 0; i < 10000000; i++)
+        for (int i = 0; i < 30000000; i++)
         {
             jfireSE.deSerialize(serialize);
         }

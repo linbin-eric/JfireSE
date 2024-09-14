@@ -23,7 +23,7 @@ public class LongTest
         kryo.writeClassAndObject(output, new LongData());
         byte[] bb = output.toBytes();
         System.out.println("LongData序列化：kryo基础数据长度：" + bb.length);
-        JfireSE jfireSE   = JfireSE.supportRefTracking(true).build();
+        JfireSE jfireSE   = JfireSE.config().refTracking().build();
         byte[]  serialize = jfireSE.serialize(new LongData());
         System.out.println("LongData序列化：jfirese基础数据长度：" + serialize.length);
         System.out.println("序列化长度减少" + (bb.length - serialize.length));
@@ -35,5 +35,4 @@ public class LongTest
         log.info("basedata序列化：jfirese基础数据长度：" + serialize1.length);
         log.info("序列化长度减少{}", (bb.length - serialize1.length));
     }
-
 }

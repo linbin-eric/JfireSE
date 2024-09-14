@@ -43,14 +43,13 @@ public class VariableFieldInfo extends FieldInfo
         else
         {
             Class<?> objClass = obj.getClass();
-            classInfo = classInfo.getClazz() == objClass ? classInfo : jfireSE.getOrCreateClassInfo(objClass);
-            if (classInfo == firstClassInfo)
+            if (firstClassInfo.getClazz() == objClass)
             {
-                classInfo.writeKnownClazz(byteArray, obj);
+                firstClassInfo.writeKnownClazz(byteArray, obj);
             }
             else
             {
-                classInfo.write(byteArray, obj);
+                jfireSE.getOrCreateClassInfo(objClass).write(byteArray, obj);
             }
         }
     }
