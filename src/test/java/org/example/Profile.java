@@ -10,6 +10,7 @@ public class Profile
     JfireSE  jfireSE   = JfireSE.supportRefTracking(true).build();
     TestData data      = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
     byte[]   serialize = jfireSE.serialize(data);
+    Object   unuse     = jfireSE.deSerialize(serialize);
 
     @Test
     public void test()

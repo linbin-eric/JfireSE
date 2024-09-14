@@ -3,9 +3,12 @@ package com.jfirer.se2.classinfo;
 import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
 
-public class StaticClasInfo extends ClassInfo
+/**
+ * 事先注册的类，这样在序列化的时候只需要序列化 classId 即可。
+ */
+public class RegisterClasInfo extends ClassInfo
 {
-    public StaticClasInfo(short classId, Class<?> clazz, boolean refTracking)
+    public RegisterClasInfo(short classId, Class<?> clazz, boolean refTracking)
     {
         super(classId, clazz, refTracking);
     }
@@ -28,10 +31,10 @@ public class StaticClasInfo extends ClassInfo
                 byteArray.writePositiveVarInt(classId);
                 byteArray.writePositiveVarInt(i);
             }
-            if (firstSerialized)
+            if (!needClean)
             {
-                firstSerialized = false;
-                jfireSE.addCleanClassInfo(this);
+                needClean = true;
+                jfireSE.scheduleForClean(this);
             }
         }
         else

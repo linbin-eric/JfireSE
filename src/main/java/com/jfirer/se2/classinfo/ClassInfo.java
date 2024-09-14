@@ -6,13 +6,10 @@ import com.jfirer.se2.serializer.Serializer;
 import io.github.karlatemp.unsafeaccessor.Unsafe;
 import lombok.Data;
 
-import java.nio.charset.StandardCharsets;
-
 @Data
 public abstract class ClassInfo implements RefTracking
 {
     protected final        short      classId;
-    protected final        byte[]     classNameBytes;
     protected final        byte[]     classNameStringBytes;
     protected final        byte       classNameStringCoder;
     protected final        Class<?>   clazz;
@@ -21,7 +18,7 @@ public abstract class ClassInfo implements RefTracking
     protected              int        refTrackingIndex = 0;
     protected              Serializer serializer;
     protected              JfireSE    jfireSE;
-    protected              boolean    firstSerialized  = true;
+    protected              boolean    needClean        = false;
     protected static final Unsafe     UNSAFE           = Unsafe.getUnsafe();
 
     public ClassInfo(short classId, Class<?> clazz, boolean refTrack)
@@ -29,7 +26,6 @@ public abstract class ClassInfo implements RefTracking
         this.classId         = classId;
         this.clazz           = clazz;
         this.refTrack        = refTrack;
-        classNameBytes       = clazz.getName().getBytes(StandardCharsets.UTF_8);
         classNameStringBytes = (byte[]) UNSAFE.getReference(clazz.getName(), ByteArray.STRING_VALUE_FIELD_OFFSET);
         classNameStringCoder = UNSAFE.getByte(clazz.getName(), ByteArray.STRING_CODER_FIELD_OFFSET);
     }
@@ -58,7 +54,7 @@ public abstract class ClassInfo implements RefTracking
         return -1;
     }
 
-    public void reset()
+    public void clean()
     {
         if (refTrackingIndex != 0)
         {
@@ -68,7 +64,7 @@ public abstract class ClassInfo implements RefTracking
             }
             refTrackingIndex = 0;
         }
-        firstSerialized = true;
+        needClean = false;
     }
 
     /**
@@ -118,10 +114,10 @@ public abstract class ClassInfo implements RefTracking
     public Object readWithTrack(ByteArray byteArray)
     {
         Object result = serializer.read(byteArray, this);
-        if (firstSerialized)
+        if (!needClean)
         {
-            firstSerialized = false;
-            jfireSE.addCleanClassInfo(this);
+            needClean = true;
+            jfireSE.scheduleForClean(this);
         }
         return result;
     }

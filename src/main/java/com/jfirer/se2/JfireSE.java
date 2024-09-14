@@ -42,5 +42,5 @@ public interface JfireSE
 
     Object readByUnderInstanceIdFlag(ByteArray byteArray, byte flag);
 
-    void addCleanClassInfo(ClassInfo classInfo);
+    void scheduleForClean(ClassInfo classInfo);
 }

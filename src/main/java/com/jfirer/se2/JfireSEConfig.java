@@ -1,6 +1,6 @@
 package com.jfirer.se2;
 
-import com.jfirer.se2.classinfo.StaticClasInfo;
+import com.jfirer.se2.classinfo.RegisterClasInfo;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -13,9 +13,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class JfireSEConfig
 {
     private        boolean          refTracking         = false;
-    private        short            staticClassId       = 0;
-    private        StaticClasInfo[] clasInfos           = new StaticClasInfo[10];
-    private        Set<Class<?>>    set                 = new HashSet<>();
+    private        short              staticClassId = 0;
+    private        RegisterClasInfo[] clasInfos     = new RegisterClasInfo[10];
+    private        Set<Class<?>>      set           = new HashSet<>();
     private static Set<Class<?>>    NO_NEED_TRACK_CLASS = new HashSet<>();
 
     static
@@ -113,14 +113,14 @@ public class JfireSEConfig
 
     public JfireSE build()
     {
-        StaticClasInfo[] array = set.stream().map(this::resolve).toArray(StaticClasInfo[]::new);
+        RegisterClasInfo[] array = set.stream().map(this::resolve).toArray(RegisterClasInfo[]::new);
         return new JfireSEImpl(refTracking, array);
     }
 
-    private StaticClasInfo resolve(Class<?> clazz)
+    private RegisterClasInfo resolve(Class<?> clazz)
     {
-        StaticClasInfo staticClasInfo = new StaticClasInfo(staticClassId, clazz, NO_NEED_TRACK_CLASS.contains(clazz) ? false : refTracking);
+        RegisterClasInfo registerClasInfo = new RegisterClasInfo(staticClassId, clazz, NO_NEED_TRACK_CLASS.contains(clazz) ? false : refTracking);
         staticClassId++;
-        return staticClasInfo;
+        return registerClasInfo;
     }
 }
