@@ -1,7 +1,18 @@
-package org.example.festest;
+package org.example;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Output;
+import com.jfirer.se2.ByteArray;
 import com.jfirer.se2.JfireSE;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fury.Fury;
+import org.example.festest.Home;
+import org.example.festest.User;
 import org.example.festest.data.*;
+import org.example.festest.data.Person;
+import org.example.sm.TestDataSm;
+import org.example.sm2.TestDataSm2;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,12 +20,20 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Random;
 
 import static org.junit.Assert.*;
 
+@Slf4j
 public class RightTest
 {
+    @Data
+    public class MapDemo
+    {
+        private HashMap<Integer, BaseData> map = new HashMap<Integer, BaseData>();
+    }
+
     @Test
     public void baseTypeTest() throws IllegalArgumentException, IllegalAccessException, UnsupportedEncodingException, ClassNotFoundException, InstantiationException
     {
@@ -146,13 +165,13 @@ public class RightTest
     @Test
     public void referenceTest()
     {
-        Person person  = new Person("linbin", 25);
-        Person tPerson = new Person("zhangshi[in", 30);
+        org.example.festest.data.Person person  = new org.example.festest.data.Person("linbin", 25);
+        org.example.festest.data.Person tPerson = new org.example.festest.data.Person("zhangshi[in", 30);
         person.setLeader(tPerson);
         tPerson.setLeader(person);
-        JfireSE jfireSE   = JfireSE.config().refTracking().build();
-        byte[]  serialize = jfireSE.serialize(person);
-        Person  result    = (Person) jfireSE.deSerialize(serialize);
+        JfireSE                         jfireSE   = JfireSE.config().refTracking().build();
+        byte[]                          serialize = jfireSE.serialize(person);
+        org.example.festest.data.Person result    = (org.example.festest.data.Person) jfireSE.deSerialize(serialize);
         assertEquals("zhangshi[in", result.getLeader().getName());
     }
 
@@ -195,7 +214,7 @@ public class RightTest
     public void objectArrayTest()
     {
         Object[] array = new Object[4];
-        array[0] = new Person();
+        array[0] = new org.example.festest.data.Person();
         array[1] = new BaseData();
         array[2] = new LongData();
         array[3] = new WrapData();
@@ -279,5 +298,104 @@ public class RightTest
         Method  method           = (Method) jfireSE.deSerialize(serialize);
         System.out.println(method.equals(methodObjectTest));
         assertEquals(methodObjectTest, method);
+    }
+
+    @Test
+    public void basetest()
+    {
+        JfireSE jfireSE = JfireSE.config().refTracking().build();
+        User    user    = new User();
+        user.setAge(123);
+        user.setName("aaa");
+        org.example.festest.Home home = new org.example.festest.Home();
+        home.setAddress("ssss");
+        home.setUser(user);
+        user.setHome(home);
+        byte[] serialize = jfireSE.serialize(user);
+        User   another   = (User) jfireSE.deSerialize(serialize);
+        Assert.assertEquals(user.getAge(), another.getAge());
+        Assert.assertEquals(user.getName(), another.getName());
+        Home home1 = user.getHome();
+        Assert.assertEquals(home.getAddress(), home1.getAddress());
+    }
+
+    @Test
+    public void longtest()
+    {
+        Kryo kryo = new Kryo();
+        kryo.setReferences(true);
+        Output output = null;
+        output = new Output(1, 15096);
+        kryo.writeClassAndObject(output, new LongData());
+        byte[] bb = output.toBytes();
+        System.out.println("LongData序列化：kryo基础数据长度：" + bb.length);
+        JfireSE jfireSE   = JfireSE.config().refTracking().build();
+        byte[]  serialize = jfireSE.serialize(new LongData());
+        System.out.println("LongData序列化：jfirese基础数据长度：" + serialize.length);
+        System.out.println("序列化长度减少" + (bb.length - serialize.length));
+        output = new Output(1, 15096);
+        kryo.writeClassAndObject(output, new BaseData(1));
+        bb = output.toBytes();
+        log.debug("basedata序列化：kryo基础数据长度：{}", bb.length);
+        byte[] serialize1 = jfireSE.serialize(new BaseData(1));
+        log.info("basedata序列化：jfirese基础数据长度：" + serialize1.length);
+        log.info("序列化长度减少{}", (bb.length - serialize1.length));
+    }
+
+    @Test
+    public void mapTest()
+    {
+        MapDemo demo = new MapDemo();
+        demo.getMap().put(1, new BaseData());
+        JfireSE jfireSE   = JfireSE.config().staticRegisterClass(MapDemo.class).refTracking().build();
+        byte[]  serialize = jfireSE.serialize(demo);
+        jfireSE.deSerialize(serialize);
+    }
+
+    @Test
+    public void test()
+    {
+        ByteArray byteArray = new ByteArray(1000);
+        byteArray.writeString("你好");
+        byteArray.writeString("nihao");
+        byteArray.writeVarInt(20);
+        byteArray.writeVarLong(13453242);
+        Assert.assertEquals("你好", byteArray.readString());
+        Assert.assertEquals("nihao", byteArray.readString());
+        Assert.assertEquals(20, byteArray.readVarInt());
+        Assert.assertEquals(13453242, byteArray.readVarLong());
+    }
+
+    @Test
+    public void test2()
+    {
+        TestDataSm sm = new TestDataSm();
+        sm.setC("dfdfdf");
+        TestData testData = new TestData();
+        testData.setB(true);
+        testData.setTestDataSm(sm);
+        testData.setTestDataSm2(new TestDataSm2());
+        TestDataSm[] sms = new TestDataSm[2];
+        sms[0] = new TestDataSm().setC("xx");
+        testData.setSms(sms);
+        JfireSE jfireSE = JfireSE.config().build();
+        byte[]  bytes   = jfireSE.serialize(testData);
+        Assert.assertEquals(testData, jfireSE.deSerialize(bytes));
+        TestData read = (TestData) jfireSE.deSerialize(bytes);
+        Assert.assertEquals("xx", read.getSms()[0].getC());
+        Assert.assertNull(read.getSms()[1]);
+    }
+
+    @Test
+    public void test3()
+    {
+        Fury               fury   = Fury.builder().requireClassRegistration(false).withRefTracking(true).build();
+        org.example.Home   home   = new org.example.Home();
+        org.example.Person person = new org.example.Person();
+        home.setPerson(person);
+        person.setHome(home);
+        fury.serialize(home);
+        JfireSE jfireSE = JfireSE.config().refTracking().build();
+        jfireSE.serialize(home);
     }
 }

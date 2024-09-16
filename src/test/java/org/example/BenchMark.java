@@ -1,7 +1,6 @@
 package org.example;
 
 import com.jfirer.fse.ByteArray;
-import com.jfirer.fse.Fse;
 import com.jfirer.se2.JfireSE;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
@@ -21,44 +20,48 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Fork(1)
 @State(Scope.Benchmark)
-public class BenchMarkWrite
+public class BenchMark
 {
-    Fse       fse     = new Fse();
-    Fse       fse_3   = new Fse().useCompile();
     TestData  data    = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
     ByteArray buf     = ByteArray.allocate(100);
     Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
                             .withRefTracking(true).build();
     JfireSE   jfireSE = JfireSE.config().refTracking().build();
+    byte[]   serialize  = jfireSE.serialize(data);
+    byte[]   serialize2 = fury.serialize(data);
 
-    public void testFSENoCompile()
-    {
-        buf.clear();
-        fse.serialize(data, buf);
-    }
 
     @Benchmark
-    public void testFury()
+    public void fury_write()
     {
         byte[] bytes = fury.serialize(data);
     }
 
-    public void testFSEDirectCompile()
-    {
-        buf.clear();
-        fse_3.serialize(data, buf);
-    }
 
     @Benchmark
-    public void testJfireSE()
+    public void jfireSe_write()
     {
         jfireSE.serialize(data);
     }
 
+
+    @Benchmark
+    public void jfireSE_read()
+    {
+        jfireSE.deSerialize(serialize);
+    }
+
+    @Benchmark
+    public void fury_read()
+    {
+        fury.deserialize(serialize2);
+    }
+
+
     public static void main(String[] args) throws RunnerException
     {
-        Options opt = new OptionsBuilder().include(BenchMarkWrite.class.getSimpleName()).build();
+        Options opt = new OptionsBuilder().include(BenchMark.class.getSimpleName()).build();
         new Runner(opt).run();
     }
 }
