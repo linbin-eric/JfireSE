@@ -20,7 +20,7 @@ public class BoxedFieldInfo extends FieldInfo
         {
             case ReflectUtil.CLASS_BOOL ->
             {
-                Boolean obj = accessor.getBooleanObject(instance);
+                Boolean obj = (Boolean) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -33,7 +33,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_BYTE ->
             {
-                Byte obj = accessor.getByteObject(instance);
+                Byte obj = (Byte) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -46,7 +46,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_CHAR ->
             {
-                Character obj = accessor.getCharObject(instance);
+                Character obj = (Character) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -59,7 +59,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_SHORT ->
             {
-                Short obj = accessor.getShortObject(instance);
+                Short obj = (Short) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -72,7 +72,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_INT ->
             {
-                Integer obj = accessor.getIntObject(instance);
+                Integer obj = (Integer) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -85,7 +85,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_LONG ->
             {
-                Long obj = accessor.getLongObject(instance);
+                Long obj = (Long) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -98,7 +98,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_FLOAT ->
             {
-                Float obj = accessor.getFloatObject(instance);
+                Float obj = (Float) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -111,7 +111,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_DOUBLE ->
             {
-                Double obj = accessor.getDoubleObject(instance);
+                Double obj = (Double) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -124,7 +124,7 @@ public class BoxedFieldInfo extends FieldInfo
             }
             case ReflectUtil.CLASS_STRING ->
             {
-                String obj = (String) accessor.get(instance);
+                String obj = (String) accessor.getReference(instance);
                 if (obj == null)
                 {
                     byteArray.put(JfireSE.NULL);
@@ -149,63 +149,63 @@ public class BoxedFieldInfo extends FieldInfo
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readBoolean());
+                    accessor.setReference(instance, byteArray.readBoolean());
                 }
             }
             case ReflectUtil.CLASS_BYTE ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.get());
+                    accessor.setReference(instance, byteArray.get());
                 }
             }
             case ReflectUtil.CLASS_CHAR ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readChar());
+                    accessor.setReference(instance, byteArray.readChar());
                 }
             }
             case ReflectUtil.CLASS_SHORT ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, (short) byteArray.readVarInt());
+                    accessor.setReference(instance, (short) byteArray.readVarInt());
                 }
             }
             case ReflectUtil.CLASS_INT ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readVarInt());
+                    accessor.setReference(instance, byteArray.readVarInt());
                 }
             }
             case ReflectUtil.CLASS_LONG ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readVarLong());
+                    accessor.setReference(instance, byteArray.readVarLong());
                 }
             }
             case ReflectUtil.CLASS_FLOAT ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readFloat());
+                    accessor.setReference(instance, byteArray.readFloat());
                 }
             }
             case ReflectUtil.CLASS_DOUBLE ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readDouble());
+                    accessor.setReference(instance, byteArray.readDouble());
                 }
             }
             case ReflectUtil.CLASS_STRING ->
             {
                 if (exist)
                 {
-                    accessor.setObject(instance, byteArray.readString());
+                    accessor.setReference(instance, byteArray.readString());
                 }
             }
             default -> throw new RuntimeException("不支持的类型");

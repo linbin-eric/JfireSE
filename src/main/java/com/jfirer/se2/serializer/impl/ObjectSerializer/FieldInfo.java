@@ -1,7 +1,7 @@
 package com.jfirer.se2.serializer.impl.ObjectSerializer;
 
 import com.jfirer.baseutil.reflect.ReflectUtil;
-import com.jfirer.baseutil.reflect.ValueAccessor;
+import com.jfirer.baseutil.reflect.valueaccessor.ValueAccessor;
 import com.jfirer.baseutil.smc.compiler.CompileHelper;
 import com.jfirer.se2.ByteArray;
 import lombok.Data;
@@ -19,7 +19,7 @@ public abstract class FieldInfo
     public FieldInfo(Field field)
     {
         this.classId  = ReflectUtil.getClassId(field.getType());
-        this.accessor = new ValueAccessor(field);
+        this.accessor = ValueAccessor.standard(field);
         this.field    = field;
     }
 
