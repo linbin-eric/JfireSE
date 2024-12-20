@@ -81,6 +81,7 @@ public class JfireSEImpl implements JfireSE
         {
             each.clean();
         }
+        byteArray.clear();
         scheduleForCleans.clear();
     }
 

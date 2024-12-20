@@ -29,6 +29,7 @@ public class ByteArray
     public static final    int                              DOUBLE_ARRAY_OFFSET;
     public static final    long                             STRING_VALUE_FIELD_OFFSET;
     public static final    long                             STRING_CODER_FIELD_OFFSET;
+    public static final    byte[]                           EMPTY                 = new byte[0];
     protected              byte[]                           array;
     protected              int                              writerIndex           = 0;
     protected              int                              readerIndex           = 0;
@@ -100,6 +101,7 @@ public class ByteArray
     public void clear()
     {
         writerIndex = readerIndex = 0;
+        this.array  = EMPTY;
     }
 
     public void put(byte value)
