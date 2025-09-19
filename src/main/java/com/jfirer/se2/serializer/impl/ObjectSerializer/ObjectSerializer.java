@@ -587,7 +587,7 @@ public class ObjectSerializer implements Serializer
             MethodModel initModel = new MethodModel(Serializer.class.getDeclaredMethod("init"), classModel);
             initModel.setBody(initBody.toString());
             classModel.putMethodModel(initModel);
-            CompileHelper compiler                 = new CompileHelper(Thread.currentThread().getContextClassLoader());
+            CompileHelper compiler                 = new CompileHelper();
             Class<?>      compile                  = compiler.compile(classModel);
             Serializer    compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSE.class, List.class).newInstance(clazz, jfireSE, parse);
             return compiledObjectSerializer;
