@@ -23,10 +23,11 @@ import java.util.function.Predicate;
 
 public class ObjectSerializer implements Serializer
 {
-    private final        FieldInfo[] fieldInfos;
-    private final        Class<?>    clazz;
-    private static       int         COMPILE_COUNT = 1;
-    private static final Unsafe      UNSAFE        = Unsafe.getUnsafe();
+    private final        FieldInfo[]   fieldInfos;
+    private final        Class<?>      clazz;
+    private static       int           COMPILE_COUNT = 1;
+    private static final Unsafe        UNSAFE        = Unsafe.getUnsafe();
+    private static final CompileHelper compiler      = new CompileHelper();
 
     private ObjectSerializer(Class<?> clazz, JfireSE jfireSE)
     {
@@ -587,9 +588,8 @@ public class ObjectSerializer implements Serializer
             MethodModel initModel = new MethodModel(Serializer.class.getDeclaredMethod("init"), classModel);
             initModel.setBody(initBody.toString());
             classModel.putMethodModel(initModel);
-            CompileHelper compiler                 = new CompileHelper(Thread.currentThread().getContextClassLoader());
-            Class<?>      compile                  = compiler.compile(classModel);
-            Serializer    compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSE.class, List.class).newInstance(clazz, jfireSE, parse);
+            Class<?>   compile                  = compiler.compile(classModel);
+            Serializer compiledObjectSerializer = (Serializer) compile.getDeclaredConstructor(Class.class, JfireSE.class, List.class).newInstance(clazz, jfireSE, parse);
             return compiledObjectSerializer;
         }
         catch (NoSuchMethodException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e)
