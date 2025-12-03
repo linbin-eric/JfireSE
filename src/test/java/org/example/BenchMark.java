@@ -1,7 +1,6 @@
 package org.example;
 
-import com.jfirer.fse.ByteArray;
-import com.jfirer.se2.JfireSE;
+import cc.jfire.se2.JfireSE;
 import org.apache.fury.Fury;
 import org.apache.fury.config.Language;
 import org.example.sm.TestDataSm;
@@ -22,9 +21,8 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class BenchMark
 {
-    TestData  data    = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
-    ByteArray buf     = ByteArray.allocate(100);
-    Fury      fury    = Fury.builder().withLanguage(Language.JAVA)//
+    TestData  data = new TestData().setTestDataSm(new TestDataSm()).setTestDataSm2(new TestDataSm2());
+    Fury      fury = Fury.builder().withLanguage(Language.JAVA)//
                             .requireClassRegistration(false)//
                             .withRefTracking(true).build();
     JfireSE   jfireSE = JfireSE.config().refTracking().build();

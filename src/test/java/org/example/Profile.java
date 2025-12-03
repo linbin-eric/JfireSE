@@ -1,6 +1,6 @@
 package org.example;
 
-import com.jfirer.se2.JfireSE;
+import cc.jfire.se2.JfireSE;
 import org.example.sm.TestDataSm;
 import org.example.sm2.TestDataSm2;
 import org.junit.Test;

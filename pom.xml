@@ -2,30 +2,33 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.jfirer</groupId>
+    <groupId>cc.jfire</groupId>
     <artifactId>JfireSE</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>JfireSE</name>
-    <url>http://maven.apache.org</url>
-
+    <url>https://github.com/linbin-eric/JfireSE</url>
+    <description>JfireSE（Jfire Serialization Engine）是一个高性能的 Java 序列化框架，专为高吞吐量场景设计。</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
     </properties>
-    <distributionManagement>
-        <repository>
-            <id>nexus3</id>
-            <name>nexus</name>
-            <url>http://yynas.cn:8081/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus3</id>
-            <name>nexus</name>
-            <url>http://yynas.cn:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <scm>
+        <url>https://github.com/linbin-eric/JfireSE</url>
+    </scm>
+    <developers>
+        <developer>
+            <name>jfirer</name>
+            <email>495561397@qq.com</email>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+        </license>
+    </licenses>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -34,21 +37,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.jfirer</groupId>
+            <groupId>cc.jfire</groupId>
             <artifactId>baseutil</artifactId>
-            <version>1.1.12-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.34</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.jfirer</groupId>
-            <artifactId>Fse</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.fury</groupId>
@@ -95,6 +92,64 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.9.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.4</version>   <!-- 2025年最新版 -->
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

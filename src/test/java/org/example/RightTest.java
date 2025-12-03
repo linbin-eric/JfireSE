@@ -2,8 +2,8 @@ package org.example;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import com.jfirer.se2.ByteArray;
-import com.jfirer.se2.JfireSE;
+import cc.jfire.se2.ByteArray;
+import cc.jfire.se2.JfireSE;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fury.Fury;

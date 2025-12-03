@@ -1,6 +1,6 @@
 package org.example.festest;
 
-import com.jfirer.se2.JfireSE;
+import cc.jfire.se2.JfireSE;
 import org.junit.Assert;
 import org.junit.Test;
 
